@@ -569,25 +569,29 @@
 </div>
 
 <script>
-  /* ---------- persistence ---------- */
-  const STORAGE_KEY = 'nikahyuk-data-v1';
-  function loadState() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-    catch (e) { return {}; }
-  }
+  /* ---------- persistence (server, shared di semua device) ---------- */
+  let isLoaded = false; // cegah save nimpa data server sebelum load awal kelar
+  let saveTimer = null;
   function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      weddingDate: dateEl.value, groups, jadwal, tamu, vendor, keuangan, customTabs, customCounter
-    }));
+    if (!isLoaded) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          weddingDate: dateEl.value, groups, jadwal, tamu, vendor, keuangan, customTabs, customCounter
+        })
+      }).catch(() => {});
+    }, 400);
   }
-  const saved = loadState();
 
   /* ---------- state ---------- */
-  let groups = saved.groups || [{ name: 'Surat Nikah', items: [{ name: 'KTP', checked: false }, { name: 'KK', checked: false }] }];
-  let jadwal = saved.jadwal || []; // { nama, tanggal, jam }
-  let tamu = saved.tamu || [];
-  let vendor = saved.vendor || [];
-  let keuangan = saved.keuangan || []; // { name, amount, type: 'masuk'|'keluar' }
+  let groups = [{ name: 'Surat Nikah', items: [{ name: 'KTP', checked: false }, { name: 'KK', checked: false }] }];
+  let jadwal = []; // { nama, tanggal, jam }
+  let tamu = [];
+  let vendor = [];
+  let keuangan = []; // { name, amount, type: 'masuk'|'keluar' }
   let kvType = 'masuk';
 
   const CHECK_SVG = `<svg viewBox="0 0 21 21"><path d="M4 11 L9 16 L18 6"/></svg>`;
@@ -601,7 +605,6 @@
   /* ---------- countdown ---------- */
   const dateEl = document.getElementById('weddingDate');
   const countdownEl = document.getElementById('countdown');
-  if (saved.weddingDate) dateEl.value = saved.weddingDate;
   function updateCountdown() {
     if (!dateEl.value) { countdownEl.style.display = 'none'; return; }
     countdownEl.style.display = 'inline-block';
@@ -971,8 +974,8 @@
   kvAmountInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addTransaksi(); });
 
   /* ---------- CUSTOM TABS ---------- */
-  let customTabs = saved.customTabs || []; // { id, name, emoji, items: [{name, checked, date}] }
-  let customCounter = saved.customCounter || 0;
+  let customTabs = []; // { id, name, emoji, items: [{name, checked, date}] }
+  let customCounter = 0;
   const customTabBtnsEl = document.getElementById('customTabBtns');
   const customPanelsEl = document.getElementById('customPanels');
 
@@ -1094,13 +1097,30 @@
   }
 
   /* ---------- init ---------- */
-  renderGroups();
-  renderJadwal();
-  renderTamu();
-  renderVendor();
-  renderKeuangan();
-  renderCustomTabs();
-  updateCountdown();
+  (async function init() {
+    try {
+      const res = await fetch('/api/data');
+      const saved = await res.json();
+      if (saved) {
+        if (saved.weddingDate) dateEl.value = saved.weddingDate;
+        if (saved.groups) groups = saved.groups;
+        if (saved.jadwal) jadwal = saved.jadwal;
+        if (saved.tamu) tamu = saved.tamu;
+        if (saved.vendor) vendor = saved.vendor;
+        if (saved.keuangan) keuangan = saved.keuangan;
+        if (saved.customTabs) customTabs = saved.customTabs;
+        if (saved.customCounter) customCounter = saved.customCounter;
+      }
+    } catch (e) {}
+    isLoaded = true;
+    renderGroups();
+    renderJadwal();
+    renderTamu();
+    renderVendor();
+    renderKeuangan();
+    renderCustomTabs();
+    updateCountdown();
+  })();
 </script>
 
 </body>
