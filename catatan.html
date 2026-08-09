@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bismillah Nikah Yuk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #faf6ec;
+    --paper-line: #dcd4c2;
+    --margin-red: #c1443a;
+    --ink: #2b2a28;
+    --ink-soft: #7d7669;
+    --stamp: #c1443a;
+    --check-green: #4a7c59;
+    --gold: #b08a3e;
+    --shadow: rgba(43, 42, 40, 0.12);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 40px 16px 60px;
+    background: #e9e2d0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(0,0,0,0.03) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(0,0,0,0.03) 0%, transparent 40%);
+    font-family: 'Space Grotesk', sans-serif;
+    display: flex;
+    justify-content: center;
+  }
+
+  .notebook {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    background: var(--paper);
+    border-radius: 4px;
+    box-shadow:
+      0 1px 2px var(--shadow),
+      0 12px 32px -8px var(--shadow),
+      0 24px 48px -16px rgba(43,42,40,0.15);
+    padding: 36px 26px 34px 54px;
+  }
+
+  .margin-line {
+    position: absolute;
+    left: 34px;
+    top: 0;
+    bottom: 0;
+    width: 1.5px;
+    background: var(--margin-red);
+    opacity: 0.35;
+  }
+
+  .washi {
+    position: absolute;
+    top: -14px;
+    right: 28px;
+    width: 70px;
+    height: 26px;
+    background: repeating-linear-gradient(45deg, #d9b48f, #d9b48f 6px, #cfa87e 6px, #cfa87e 12px);
+    opacity: 0.85;
+    transform: rotate(3deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+
+  h1 {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 38px;
+    color: var(--ink);
+    margin: 0 0 4px;
+    line-height: 1;
+  }
+
+  .subtitle {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+  }
+
+  .date-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px dashed #b9ac93;
+    border-radius: 6px;
+  }
+
+  .date-box label { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+
+  .date-box input[type="date"] {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13.5px;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .countdown {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: #fff;
+    background: var(--check-green);
+    padding: 4px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    border: none;
+    background: transparent;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    color: var(--ink-soft);
+    padding: 8px 10px 10px;
+    cursor: pointer;
+    position: relative;
+    top: 2px;
+  }
+
+  .tab-btn.active {
+    color: var(--ink);
+    font-weight: 700;
+    border-bottom: 2px solid var(--margin-red);
+  }
+
+  .tab-add-btn {
+    border: none;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 15px;
+    font-weight: 700;
+    padding: 8px 10px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+    top: 2px;
+    position: relative;
+  }
+  .tab-add-btn:hover { color: var(--margin-red); }
+
+  .tab-close {
+    background: none; border: none; color: inherit;
+    font-size: 11px; opacity: 0.5; margin-left: 4px; cursor: pointer; padding: 0;
+  }
+  .tab-close:hover { opacity: 1; color: var(--margin-red); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Shared form bits */
+  input[type="text"], input[type="number"] {
+    border: none;
+    border-bottom: 1.5px dashed #b9ac93;
+    background: transparent;
+    padding: 6px 4px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14.5px;
+    color: var(--ink);
+    outline: none;
+  }
+
+  input::placeholder { color: var(--ink-soft); }
+  input:focus { border-bottom-color: var(--margin-red); }
+
+  button.add {
+    border: none;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+    white-space: nowrap;
+  }
+
+  button.add:hover { background: #4a463d; }
+  button.add:active { transform: scale(0.95); }
+
+  button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--margin-red);
+    outline-offset: 2px;
+  }
+
+  ul { list-style: none; margin: 0; padding: 0; }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 0;
+    min-height: 34px;
+    border-bottom: 1px solid var(--paper-line);
+  }
+
+  li:last-child { border-bottom: none; }
+
+  .check-box {
+    flex-shrink: 0;
+    width: 19px;
+    height: 19px;
+    border: 2px solid var(--ink-soft);
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+    transform: rotate(-1deg);
+  }
+
+  .check-box svg {
+    position: absolute;
+    top: -3px; left: -3px;
+    width: 21px; height: 21px;
+    pointer-events: none;
+  }
+
+  .check-box path {
+    fill: none;
+    stroke: var(--check-green);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+    transition: stroke-dashoffset 0.25s ease;
+  }
+
+  li.checked .check-box { border-color: var(--check-green); }
+  li.checked .check-box path { stroke-dashoffset: 0; }
+
+  li span.name { flex: 1; font-size: 15px; color: var(--ink); position: relative; cursor: text; }
+  .meta[onclick] { cursor: text; }
+  .group-title[onclick] { cursor: text; }
+  li.checked span.name { color: var(--ink-soft); }
+
+  li.checked span.name::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    height: 1.5px;
+    background: var(--check-green);
+    opacity: 0.6;
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: strike 0.3s ease forwards;
+  }
+
+  @keyframes strike { to { transform: scaleX(1); } }
+
+  .meta { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+
+  .jadwal-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: #fff;
+    background: var(--gold);
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .amount-in { color: var(--check-green); font-family: 'JetBrains Mono', monospace; font-size: 13.5px; white-space: nowrap; }
+  .amount-out { color: var(--margin-red); font-family: 'JetBrains Mono', monospace; font-size: 13.5px; white-space: nowrap; }
+
+  .del {
+    background: none; border: none;
+    color: var(--ink-soft); font-size: 15px;
+    cursor: pointer; opacity: 0.45;
+    transition: opacity 0.15s ease, color 0.15s ease;
+    padding: 4px 6px;
+  }
+
+  li:hover .del, li:focus-within .del { opacity: 1; }
+  .del:hover { color: var(--margin-red); }
+  @media (hover: none) { .del { opacity: 0.7; } }
+
+  .item-date {
+    border: 1px solid var(--paper-line);
+    background: #fff;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--check-green);
+    padding: 3px 5px;
+    outline: none;
+    white-space: nowrap;
+  }
+
+  .item-date:focus { border-color: var(--check-green); }
+
+  .empty {
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: var(--ink-soft);
+    text-align: center;
+    padding: 20px 0 6px;
+  }
+
+  /* Checklist tab */
+  .new-group { display: flex; gap: 8px; margin-bottom: 22px; }
+  #groupInput { flex: 1; }
+  .group { margin-bottom: 26px; }
+  .group-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 8px; padding-bottom: 4px; border-bottom: 2px solid var(--ink);
+  }
+  .group-title {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink);
+  }
+  .tally {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em;
+    color: #fff; background: var(--stamp); padding: 3px 7px; border-radius: 3px;
+    transform: rotate(-3deg); box-shadow: 0 2px 5px rgba(193,68,58,0.35); white-space: nowrap;
+  }
+  .del-group {
+    background: none; border: none; color: var(--ink-soft); font-size: 15px;
+    cursor: pointer; opacity: 0.45; transition: opacity 0.15s ease, color 0.15s ease; padding: 4px 6px;
+  }
+  .group-header:hover .del-group { opacity: 1; }
+  .del-group:hover { color: var(--margin-red); }
+  @media (hover: none) { .del-group { opacity: 0.7; } }
+  .item-input-row { display: flex; gap: 8px; margin-top: 6px; padding-left: 31px; }
+  .item-input-row input[type="text"] { flex: 1; font-size: 14px; }
+  .item-input-row button {
+    border: none; background: transparent; color: var(--ink-soft);
+    font-size: 13px; cursor: pointer; padding: 4px 8px;
+  }
+  .item-input-row button:hover { color: var(--ink); }
+
+  /* Tamu / Vendor forms */
+  .row-form { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .row-form input[type="text"] { flex: 1; min-width: 100px; }
+
+  /* Keuangan */
+  .kv-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .kv-toggle {
+    border: 1.5px solid var(--ink-soft); background: transparent; color: var(--ink-soft);
+    font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 500;
+    padding: 5px 12px; border-radius: 20px; cursor: pointer;
+  }
+  .kv-toggle.active.in { background: var(--check-green); border-color: var(--check-green); color: #fff; }
+  .kv-toggle.active.out { background: var(--margin-red); border-color: var(--margin-red); color: #fff; }
+
+  .summary {
+    display: flex; gap: 10px; margin-bottom: 18px;
+  }
+  .summary-card {
+    flex: 1; background: #fff; border-radius: 6px; padding: 10px 12px;
+    border: 1px solid var(--paper-line);
+  }
+  .summary-card .label { font-size: 10.5px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+  .summary-card .val { font-family: 'JetBrains Mono', monospace; font-size: 15px; margin-top: 2px; }
+  .summary-card.in .val { color: var(--check-green); }
+  .summary-card.out .val { color: var(--margin-red); }
+  .summary-card.saldo .val { color: var(--gold); }
+
+  @keyframes notebookIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .notebook { animation: notebookIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 2px 5px rgba(74,124,89,0.35); }
+    50% { box-shadow: 0 2px 12px rgba(74,124,89,0.7); }
+  }
+
+  .countdown.today { animation: pulseGlow 1.4s ease-in-out infinite; }
+
+  @keyframes confettiFall {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.4); opacity: 0; }
+  }
+
+  .confetti-piece {
+    position: fixed;
+    top: 0; left: 0;
+    width: 7px; height: 7px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 999;
+    animation: confettiFall 0.7s ease-out forwards;
+  }
+
+  @keyframes toastPop {
+    0% { opacity: 0; transform: translate(-50%, 8px) scale(0.9); }
+    12% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    85% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -8px) scale(0.95); }
+  }
+
+  .celebrate-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 36px;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Caveat', cursive;
+    font-size: 20px;
+    padding: 10px 22px;
+    border-radius: 30px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    z-index: 1000;
+    animation: toastPop 2.2s ease forwards;
+    white-space: nowrap;
+  }
+
+  @keyframes checkPop {
+    0% { transform: rotate(-1deg) scale(1); }
+    40% { transform: rotate(-1deg) scale(1.25); }
+    100% { transform: rotate(-1deg) scale(1); }
+  }
+
+  li.checked .check-box.pop { animation: checkPop 0.35s ease; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    .notebook { animation: none; }
+    .countdown.today { animation: none; }
+  }
+
+  @media (max-width: 420px) {
+    .notebook { padding: 30px 18px 26px 42px; }
+    .margin-line { left: 24px; }
+    h1 { font-size: 30px; }
+    .summary { flex-wrap: wrap; }
+    .summary-card { min-width: 45%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="notebook">
+  <div class="washi"></div>
+  <div class="margin-line"></div>
+
+  <h1>Bismillah Nikah Yuk</h1>
+  <p class="subtitle">Semua catatan persiapan nikah, dalam satu tempat.</p>
+
+  <div class="date-box">
+    <label for="weddingDate">📅 Tanggal akad</label>
+    <input type="date" id="weddingDate">
+    <span class="countdown" id="countdown"></span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist</button>
+    <button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal</button>
+    <button class="tab-btn" data-tab="tamu" onclick="switchTab('tamu')">👥 Tamu</button>
+    <button class="tab-btn" data-tab="vendor" onclick="switchTab('vendor')">🛠️ Vendor</button>
+    <button class="tab-btn" data-tab="keuangan" onclick="switchTab('keuangan')">💰 Keuangan</button>
+    <span id="customTabBtns"></span>
+    <button class="tab-add-btn" onclick="addCustomTab()" title="Tambah tab baru">+</button>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="tab-panel active" id="panel-checklist">
+    <div class="new-group">
+      <input type="text" id="groupInput" placeholder="Nama kategori, mis. Surat Nikah">
+      <button class="add" onclick="addGroup()">+ Kategori</button>
+    </div>
+    <div id="groups"></div>
+  </div>
+
+  <!-- JADWAL -->
+  <div class="tab-panel" id="panel-jadwal">
+    <div class="row-form">
+      <input type="text" id="jadwalNamaInput" placeholder="Nama acara (mis. Akad Nikah)">
+      <input type="date" id="jadwalTanggalInput" style="max-width:140px;">
+      <input type="time" id="jadwalJamInput" style="max-width:100px;">
+      <button class="add" onclick="addJadwal()">Tambah</button>
+    </div>
+    <ul id="listJadwal"></ul>
+  </div>
+
+  <!-- TAMU -->
+  <div class="tab-panel" id="panel-tamu">
+    <div class="row-form">
+      <input type="text" id="tamuInput" placeholder="Nama tamu / rombongan">
+      <button class="add" onclick="addTamu()">Tambah</button>
+    </div>
+    <ul id="listTamu"></ul>
+  </div>
+
+  <!-- VENDOR -->
+  <div class="tab-panel" id="panel-vendor">
+    <div class="row-form">
+      <input type="text" id="vendorInput" placeholder="Nama vendor (mis. Catering, MUA)">
+      <input type="text" id="vendorHargaInput" placeholder="Harga (opsional)" style="max-width:120px;">
+      <button class="add" onclick="addVendor()">Tambah</button>
+    </div>
+    <p class="subtitle" style="margin-top:-8px;">Centang kalau sudah DP / lunas.</p>
+    <ul id="listVendor"></ul>
+  </div>
+
+  <!-- KEUANGAN -->
+  <div class="tab-panel" id="panel-keuangan">
+    <div class="summary">
+      <div class="summary-card in">
+        <div class="label">Uang Masuk</div>
+        <div class="val" id="totalMasuk">Rp 0</div>
+      </div>
+      <div class="summary-card out">
+        <div class="label">Uang Keluar</div>
+        <div class="val" id="totalKeluar">Rp 0</div>
+      </div>
+      <div class="summary-card saldo">
+        <div class="label">Saldo</div>
+        <div class="val" id="totalSaldo">Rp 0</div>
+      </div>
+    </div>
+
+    <div class="kv-tabs">
+      <button class="kv-toggle active in" id="btnIn" onclick="setKvType('masuk')">+ Catat sebagai Masuk</button>
+      <button class="kv-toggle out" id="btnOut" onclick="setKvType('keluar')">− Catat sebagai Keluar</button>
+    </div>
+
+    <div class="row-form">
+      <input type="text" id="kvNameInput" placeholder="Keterangan (mis. Angpau tamu / DP catering)">
+      <input type="number" id="kvAmountInput" placeholder="Jumlah" style="max-width:110px;">
+      <button class="add" onclick="addTransaksi()">Catat</button>
+    </div>
+
+    <div class="group-header" style="border-color: var(--check-green);">
+      <span class="group-title" style="color: var(--check-green);">+ Uang Masuk</span>
+      <span class="tally" style="background: var(--check-green); box-shadow: 0 2px 5px rgba(74,124,89,0.35);" id="tallyMasuk">Rp 0</span>
+    </div>
+    <ul id="listMasuk"></ul>
+
+    <div class="group-header" style="border-color: var(--margin-red); margin-top: 20px;">
+      <span class="group-title" style="color: var(--margin-red);">− Uang Keluar</span>
+      <span class="tally" id="tallyKeluar">Rp 0</span>
+    </div>
+    <ul id="listKeluar"></ul>
+  </div>
+
+  <!-- CUSTOM TABS -->
+  <div id="customPanels"></div>
+</div>
+
+<script>
+  /* ---------- persistence ---------- */
+  const STORAGE_KEY = 'nikahyuk-data-v1';
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      weddingDate: dateEl.value, groups, jadwal, tamu, vendor, keuangan, customTabs, customCounter
+    }));
+  }
+  const saved = loadState();
+
+  /* ---------- state ---------- */
+  let groups = saved.groups || [{ name: 'Surat Nikah', items: [{ name: 'KTP', checked: false }, { name: 'KK', checked: false }] }];
+  let jadwal = saved.jadwal || []; // { nama, tanggal, jam }
+  let tamu = saved.tamu || [];
+  let vendor = saved.vendor || [];
+  let keuangan = saved.keuangan || []; // { name, amount, type: 'masuk'|'keluar' }
+  let kvType = 'masuk';
+
+  const CHECK_SVG = `<svg viewBox="0 0 21 21"><path d="M4 11 L9 16 L18 6"/></svg>`;
+
+  /* ---------- tabs ---------- */
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
+  }
+
+  /* ---------- countdown ---------- */
+  const dateEl = document.getElementById('weddingDate');
+  const countdownEl = document.getElementById('countdown');
+  if (saved.weddingDate) dateEl.value = saved.weddingDate;
+  function updateCountdown() {
+    if (!dateEl.value) { countdownEl.style.display = 'none'; return; }
+    countdownEl.style.display = 'inline-block';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const target = new Date(dateEl.value);
+    const diffDays = Math.round((target - today) / 86400000);
+    if (diffDays > 0) { countdownEl.textContent = `H-${diffDays}`; countdownEl.style.background = 'var(--check-green)'; countdownEl.classList.remove('today'); }
+    else if (diffDays === 0) { countdownEl.textContent = 'HARI INI 🎉'; countdownEl.style.background = 'var(--stamp)'; countdownEl.classList.add('today'); }
+    else { countdownEl.textContent = `${Math.abs(diffDays)} hari lalu`; countdownEl.style.background = 'var(--ink-soft)'; countdownEl.classList.remove('today'); }
+  }
+  dateEl.addEventListener('change', () => { updateCountdown(); saveState(); });
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  /* ---------- inline edit ---------- */
+  // klik nama -> jadi input -> Enter/blur simpan, Escape batal
+  function editInline(el, current, onSave) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = current;
+    input.style.font = 'inherit';
+    input.style.color = 'inherit';
+    input.style.flex = '1';
+    input.style.border = 'none';
+    input.style.borderBottom = '1.5px solid var(--margin-red)';
+    input.style.background = 'transparent';
+    input.style.padding = '0';
+    input.style.outline = 'none';
+    el.replaceWith(input);
+    input.focus();
+    input.select();
+    let done = false;
+    const finish = (commit) => {
+      if (done) return;
+      done = true;
+      const val = input.value.trim();
+      onSave(commit && val ? val : null);
+    };
+    input.addEventListener('blur', () => finish(true));
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { finish(false); }
+    });
+  }
+
+  /* ---------- confetti & celebration ---------- */
+  const CONFETTI_COLORS = ['#c1443a', '#4a7c59', '#b08a3e', '#7d7669', '#2b2a28'];
+
+  function launchConfetti(el) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const count = 10;
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+      const dist = 40 + Math.random() * 30;
+      piece.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+      piece.style.setProperty('--dy', `${Math.sin(angle) * dist - 20}px`);
+      piece.style.setProperty('--rot', `${(Math.random() * 360) | 0}deg`);
+      piece.style.left = `${x}px`;
+      piece.style.top = `${y}px`;
+      piece.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+      document.body.appendChild(piece);
+      piece.addEventListener('animationend', () => piece.remove());
+    }
+    el.classList.add('pop');
+    setTimeout(() => el.classList.remove('pop'), 350);
+  }
+
+  function celebrateToast(message) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const toast = document.createElement('div');
+    toast.className = 'celebrate-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    toast.addEventListener('animationend', () => toast.remove());
+  }
+
+  function formatRupiah(n) {
+    return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+  }
+
+  /* ---------- CHECKLIST ---------- */
+  const groupsEl = document.getElementById('groups');
+  const groupInputEl = document.getElementById('groupInput');
+
+  function renderGroups() {
+    saveState();
+    groupsEl.innerHTML = '';
+    if (groups.length === 0) {
+      groupsEl.innerHTML = '<div class="empty">Belum ada kategori…</div>';
+      return;
+    }
+    groups.forEach((group, gi) => {
+      const done = group.items.filter(x => x.checked).length;
+      const div = document.createElement('div');
+      div.className = 'group';
+      div.innerHTML = `
+        <div class="group-header">
+          <span class="group-title" title="klik utk edit" onclick="renameGroup(${gi},this)">${escapeHtml(group.name)}</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="tally">${done} / ${group.items.length}</span>
+            <button class="del-group" aria-label="Hapus kategori ${group.name}" onclick="removeGroup(${gi})">✕</button>
+          </div>
+        </div>
+        <ul id="list-${gi}"></ul>
+        <div class="item-input-row">
+          <input type="text" id="itemInput-${gi}" placeholder="Tambah syarat…">
+          <button onclick="addItem(${gi})">Tambah</button>
+        </div>`;
+      groupsEl.appendChild(div);
+
+      const listEl = div.querySelector(`#list-${gi}`);
+      group.items.forEach((item, ii) => {
+        const li = document.createElement('li');
+        if (item.checked) li.classList.add('checked');
+        li.innerHTML = `
+          <button class="check-box" aria-label="Tandai ${item.name}" onclick="toggleItem(${gi},${ii},this)">${CHECK_SVG}</button>
+          <span class="name" title="klik utk edit" onclick="renameItem(${gi},${ii},this)">${escapeHtml(item.name)}</span>
+          ${item.checked ? `<input type="date" class="item-date" value="${item.date || ''}" onchange="setItemDate(${gi},${ii},this.value)">` : ''}
+          <button class="del" aria-label="Hapus ${item.name}" onclick="removeItem(${gi},${ii})">✕</button>`;
+        listEl.appendChild(li);
+      });
+
+      div.querySelector(`#itemInput-${gi}`).addEventListener('keydown', e => { if (e.key === 'Enter') addItem(gi); });
+    });
+  }
+
+  function addGroup() {
+    const val = groupInputEl.value.trim();
+    if (!val) return;
+    groups.push({ name: val, items: [] });
+    groupInputEl.value = ''; groupInputEl.focus();
+    renderGroups();
+  }
+  function removeGroup(gi) { groups.splice(gi, 1); renderGroups(); }
+  function renameGroup(gi, el) { editInline(el, groups[gi].name, v => { if (v) groups[gi].name = v; renderGroups(); }); }
+  function addItem(gi) {
+    const inputEl = document.getElementById(`itemInput-${gi}`);
+    const val = inputEl.value.trim();
+    if (!val) return;
+    groups[gi].items.push({ name: val, checked: false });
+    renderGroups();
+    const ni = document.getElementById(`itemInput-${gi}`);
+    if (ni) ni.focus();
+  }
+  function toggleItem(gi, ii, el) {
+    const item = groups[gi].items[ii];
+    item.checked = !item.checked;
+    if (item.checked && !item.date) item.date = new Date().toISOString().slice(0, 10);
+    if (item.checked) {
+      launchConfetti(el);
+      const allDone = groups[gi].items.every(x => x.checked);
+      if (allDone && groups[gi].items.length > 0) {
+        setTimeout(() => celebrateToast(`Yeay! ${groups[gi].name} beres semua 🎉`), 150);
+      }
+    }
+    renderGroups();
+  }
+  function setItemDate(gi, ii, val) { groups[gi].items[ii].date = val; }
+  function removeItem(gi, ii) { groups[gi].items.splice(ii, 1); renderGroups(); }
+  function renameItem(gi, ii, el) { editInline(el, groups[gi].items[ii].name, v => { if (v) groups[gi].items[ii].name = v; renderGroups(); }); }
+
+  groupInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addGroup(); });
+
+  /* ---------- JADWAL ---------- */
+  const jadwalNamaEl = document.getElementById('jadwalNamaInput');
+  const jadwalTanggalEl = document.getElementById('jadwalTanggalInput');
+  const jadwalJamEl = document.getElementById('jadwalJamInput');
+  const listJadwalEl = document.getElementById('listJadwal');
+
+  function formatTanggalIndo(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function renderJadwal() {
+    saveState();
+    listJadwalEl.innerHTML = '';
+    if (jadwal.length === 0) { listJadwalEl.innerHTML = '<div class="empty">Belum ada acara dijadwalkan…</div>'; return; }
+    const sorted = jadwal.slice().sort((a, b) => `${a.tanggal}T${a.jam || '00:00'}`.localeCompare(`${b.tanggal}T${b.jam || '00:00'}`));
+    sorted.forEach((j) => {
+      const i = jadwal.indexOf(j);
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span class="name" title="klik utk edit" onclick="renameJadwal(${i},this)">${escapeHtml(j.nama)}</span>
+        <span class="jadwal-badge">${formatTanggalIndo(j.tanggal)}${j.jam ? ' · ' + j.jam : ''}</span>
+        <button class="del" aria-label="Hapus ${j.nama}" onclick="removeJadwal(${i})">✕</button>`;
+      listJadwalEl.appendChild(li);
+    });
+  }
+
+  function addJadwal() {
+    const nama = jadwalNamaEl.value.trim();
+    const tanggal = jadwalTanggalEl.value;
+    const jam = jadwalJamEl.value;
+    if (!nama || !tanggal) return;
+    jadwal.push({ nama, tanggal, jam });
+    jadwalNamaEl.value = ''; jadwalTanggalEl.value = ''; jadwalJamEl.value = '';
+    jadwalNamaEl.focus();
+    renderJadwal();
+  }
+  function removeJadwal(i) { jadwal.splice(i, 1); renderJadwal(); }
+  function renameJadwal(i, el) { editInline(el, jadwal[i].nama, v => { if (v) jadwal[i].nama = v; renderJadwal(); }); }
+  jadwalNamaEl.addEventListener('keydown', e => { if (e.key === 'Enter') addJadwal(); });
+
+  /* ---------- TAMU ---------- */
+  const tamuInputEl = document.getElementById('tamuInput');
+  const listTamuEl = document.getElementById('listTamu');
+
+  function renderTamu() {
+    saveState();
+    listTamuEl.innerHTML = '';
+    if (tamu.length === 0) { listTamuEl.innerHTML = '<div class="empty">Belum ada tamu dicatat…</div>'; return; }
+    tamu.forEach((t, i) => {
+      const li = document.createElement('li');
+      if (t.checked) li.classList.add('checked');
+      li.innerHTML = `
+        <button class="check-box" aria-label="Tandai hadir ${t.name}" onclick="toggleTamu(${i},this)">${CHECK_SVG}</button>
+        <span class="name" title="klik utk edit" onclick="renameTamu(${i},this)">${escapeHtml(t.name)}</span>
+        ${t.checked ? `<input type="date" class="item-date" value="${t.date || ''}" onchange="setTamuDate(${i},this.value)">` : ''}
+        <button class="del" aria-label="Hapus ${t.name}" onclick="removeTamu(${i})">✕</button>`;
+      listTamuEl.appendChild(li);
+    });
+  }
+  function addTamu() {
+    const val = tamuInputEl.value.trim();
+    if (!val) return;
+    tamu.push({ name: val, checked: false });
+    tamuInputEl.value = ''; tamuInputEl.focus();
+    renderTamu();
+  }
+  function toggleTamu(i, el) {
+    tamu[i].checked = !tamu[i].checked;
+    if (tamu[i].checked) {
+      if (!tamu[i].date) tamu[i].date = new Date().toISOString().slice(0, 10);
+      launchConfetti(el);
+    }
+    renderTamu();
+  }
+  function setTamuDate(i, val) { tamu[i].date = val; }
+  function removeTamu(i) { tamu.splice(i, 1); renderTamu(); }
+  function renameTamu(i, el) { editInline(el, tamu[i].name, v => { if (v) tamu[i].name = v; renderTamu(); }); }
+  tamuInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addTamu(); });
+
+  /* ---------- VENDOR ---------- */
+  const vendorInputEl = document.getElementById('vendorInput');
+  const vendorHargaInputEl = document.getElementById('vendorHargaInput');
+  const listVendorEl = document.getElementById('listVendor');
+
+  function renderVendor() {
+    saveState();
+    listVendorEl.innerHTML = '';
+    if (vendor.length === 0) { listVendorEl.innerHTML = '<div class="empty">Belum ada vendor dicatat…</div>'; return; }
+    vendor.forEach((v, i) => {
+      const li = document.createElement('li');
+      if (v.checked) li.classList.add('checked');
+      li.innerHTML = `
+        <button class="check-box" aria-label="Tandai lunas ${v.name}" onclick="toggleVendor(${i},this)">${CHECK_SVG}</button>
+        <span class="name" title="klik utk edit" onclick="renameVendor(${i},this)">${escapeHtml(v.name)}</span>
+        <span class="meta" title="klik utk edit harga" onclick="editVendorHarga(${i},this)">${v.harga ? escapeHtml(v.harga) : '—'}</span>
+        ${v.checked ? `<input type="date" class="item-date" value="${v.date || ''}" onchange="setVendorDate(${i},this.value)">` : ''}
+        <button class="del" aria-label="Hapus ${v.name}" onclick="removeVendor(${i})">✕</button>`;
+      listVendorEl.appendChild(li);
+    });
+  }
+  function addVendor() {
+    const val = vendorInputEl.value.trim();
+    if (!val) return;
+    vendor.push({ name: val, harga: vendorHargaInputEl.value.trim(), checked: false });
+    vendorInputEl.value = ''; vendorHargaInputEl.value = ''; vendorInputEl.focus();
+    renderVendor();
+  }
+  function toggleVendor(i, el) {
+    vendor[i].checked = !vendor[i].checked;
+    if (vendor[i].checked) {
+      if (!vendor[i].date) vendor[i].date = new Date().toISOString().slice(0, 10);
+      launchConfetti(el);
+    }
+    renderVendor();
+  }
+  function setVendorDate(i, val) { vendor[i].date = val; }
+  function removeVendor(i) { vendor.splice(i, 1); renderVendor(); }
+  function renameVendor(i, el) { editInline(el, vendor[i].name, v => { if (v) vendor[i].name = v; renderVendor(); }); }
+  function editVendorHarga(i, el) { editInline(el, vendor[i].harga || '', v => { vendor[i].harga = v || ''; renderVendor(); }); }
+  vendorInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addVendor(); });
+  vendorHargaInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addVendor(); });
+
+  /* ---------- KEUANGAN ---------- */
+  const kvNameInputEl = document.getElementById('kvNameInput');
+  const kvAmountInputEl = document.getElementById('kvAmountInput');
+  const btnIn = document.getElementById('btnIn');
+  const btnOut = document.getElementById('btnOut');
+
+  function setKvType(type) {
+    kvType = type;
+    btnIn.classList.toggle('active', type === 'masuk');
+    btnOut.classList.toggle('active', type === 'keluar');
+  }
+
+  const listMasukEl = document.getElementById('listMasuk');
+  const listKeluarEl = document.getElementById('listKeluar');
+
+  function renderKeuangan() {
+    saveState();
+    const masukItems = keuangan.filter(k => k.type === 'masuk');
+    const keluarItems = keuangan.filter(k => k.type === 'keluar');
+
+    listMasukEl.innerHTML = masukItems.length === 0 ? '<div class="empty" style="font-size:16px; padding:10px 0;">Belum ada catatan…</div>' : '';
+    masukItems.forEach((k) => {
+      const i = keuangan.indexOf(k);
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span class="name" title="klik utk edit" onclick="renameTransaksi(${i},this)">${escapeHtml(k.name)}</span>
+        <span class="amount-in" title="klik utk edit jumlah" onclick="editTransaksiAmount(${i},this)">+ ${formatRupiah(k.amount)}</span>
+        <button class="del" aria-label="Hapus transaksi" onclick="removeTransaksi(${i})">✕</button>`;
+      listMasukEl.appendChild(li);
+    });
+
+    listKeluarEl.innerHTML = keluarItems.length === 0 ? '<div class="empty" style="font-size:16px; padding:10px 0;">Belum ada catatan…</div>' : '';
+    keluarItems.forEach((k) => {
+      const i = keuangan.indexOf(k);
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span class="name" title="klik utk edit" onclick="renameTransaksi(${i},this)">${escapeHtml(k.name)}</span>
+        <span class="amount-out" title="klik utk edit jumlah" onclick="editTransaksiAmount(${i},this)">− ${formatRupiah(k.amount)}</span>
+        <button class="del" aria-label="Hapus transaksi" onclick="removeTransaksi(${i})">✕</button>`;
+      listKeluarEl.appendChild(li);
+    });
+
+    const masuk = masukItems.reduce((s, k) => s + k.amount, 0);
+    const keluar = keluarItems.reduce((s, k) => s + k.amount, 0);
+    document.getElementById('totalMasuk').textContent = formatRupiah(masuk);
+    document.getElementById('totalKeluar').textContent = formatRupiah(keluar);
+    document.getElementById('totalSaldo').textContent = formatRupiah(masuk - keluar);
+    document.getElementById('tallyMasuk').textContent = formatRupiah(masuk);
+    document.getElementById('tallyKeluar').textContent = formatRupiah(keluar);
+  }
+
+  function addTransaksi() {
+    const name = kvNameInputEl.value.trim();
+    const amount = parseFloat(kvAmountInputEl.value);
+    if (!name || !amount || amount <= 0) return;
+    keuangan.push({ name, amount, type: kvType });
+    kvNameInputEl.value = ''; kvAmountInputEl.value = ''; kvNameInputEl.focus();
+    renderKeuangan();
+  }
+  function removeTransaksi(i) { keuangan.splice(i, 1); renderKeuangan(); }
+  function renameTransaksi(i, el) { editInline(el, keuangan[i].name, v => { if (v) keuangan[i].name = v; renderKeuangan(); }); }
+  function editTransaksiAmount(i, el) {
+    editInline(el, keuangan[i].amount, v => {
+      const n = parseFloat(v);
+      if (v && n > 0) keuangan[i].amount = n;
+      renderKeuangan();
+    });
+  }
+  kvNameInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addTransaksi(); });
+  kvAmountInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addTransaksi(); });
+
+  /* ---------- CUSTOM TABS ---------- */
+  let customTabs = saved.customTabs || []; // { id, name, emoji, items: [{name, checked, date}] }
+  let customCounter = saved.customCounter || 0;
+  const customTabBtnsEl = document.getElementById('customTabBtns');
+  const customPanelsEl = document.getElementById('customPanels');
+
+  function addCustomTab() {
+    const name = prompt('Nama tab baru (mis. Souvenir, Baju, Katering):');
+    if (!name || !name.trim()) return;
+    customCounter += 1;
+    const id = `custom${customCounter}`;
+    customTabs.push({ id, name: name.trim(), items: [] });
+    renderCustomTabs();
+    switchTab(id);
+  }
+
+  function removeCustomTab(id) {
+    if (!confirm('Hapus tab ini beserta isinya?')) return;
+    customTabs = customTabs.filter(t => t.id !== id);
+    renderCustomTabs();
+    switchTab('checklist');
+  }
+
+  function renderCustomTabs() {
+    saveState();
+    customTabBtnsEl.innerHTML = '';
+    customPanelsEl.innerHTML = '';
+
+    customTabs.forEach(tab => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn';
+      btn.dataset.tab = tab.id;
+      btn.innerHTML = `📌 ${escapeHtml(tab.name)} <button class="tab-close" onclick="event.stopPropagation(); removeCustomTab('${tab.id}')" title="Hapus tab">✕</button>`;
+      btn.title = 'Klik utk buka, dobel-klik utk ganti nama';
+      btn.addEventListener('click', (e) => { if (e.target.classList.contains('tab-close')) return; switchTab(tab.id); });
+      btn.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        const nv = prompt('Ganti nama tab:', tab.name);
+        if (nv && nv.trim()) { tab.name = nv.trim(); renderCustomTabs(); switchTab(tab.id); }
+      });
+      customTabBtnsEl.appendChild(btn);
+
+      const panel = document.createElement('div');
+      panel.className = 'tab-panel';
+      panel.id = `panel-${tab.id}`;
+      panel.innerHTML = `
+        <div class="row-form">
+          <input type="text" id="customInput-${tab.id}" placeholder="Tambah item…">
+          <button class="add" onclick="addCustomItem('${tab.id}')">Tambah</button>
+        </div>
+        <ul id="customList-${tab.id}"></ul>`;
+      customPanelsEl.appendChild(panel);
+
+      renderCustomItems(tab.id);
+
+      document.getElementById(`customInput-${tab.id}`).addEventListener('keydown', e => {
+        if (e.key === 'Enter') addCustomItem(tab.id);
+      });
+    });
+  }
+
+  function renderCustomItems(tabId) {
+    saveState();
+    const tab = customTabs.find(t => t.id === tabId);
+    if (!tab) return;
+    const listEl = document.getElementById(`customList-${tabId}`);
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (tab.items.length === 0) { listEl.innerHTML = '<div class="empty">Belum ada item…</div>'; return; }
+    tab.items.forEach((item, i) => {
+      const li = document.createElement('li');
+      if (item.checked) li.classList.add('checked');
+      li.innerHTML = `
+        <button class="check-box" aria-label="Tandai ${item.name}" onclick="toggleCustomItem('${tabId}',${i},this)">${CHECK_SVG}</button>
+        <span class="name" title="klik utk edit" onclick="renameCustomItem('${tabId}',${i},this)">${escapeHtml(item.name)}</span>
+        ${item.checked ? `<input type="date" class="item-date" value="${item.date || ''}" onchange="setCustomItemDate('${tabId}',${i},this.value)">` : ''}
+        <button class="del" aria-label="Hapus ${item.name}" onclick="removeCustomItem('${tabId}',${i})">✕</button>`;
+      listEl.appendChild(li);
+    });
+  }
+
+  function addCustomItem(tabId) {
+    const inputEl = document.getElementById(`customInput-${tabId}`);
+    const val = inputEl.value.trim();
+    if (!val) return;
+    const tab = customTabs.find(t => t.id === tabId);
+    tab.items.push({ name: val, checked: false });
+    inputEl.value = '';
+    renderCustomItems(tabId);
+    const ni = document.getElementById(`customInput-${tabId}`);
+    if (ni) ni.focus();
+  }
+
+  function toggleCustomItem(tabId, i, el) {
+    const tab = customTabs.find(t => t.id === tabId);
+    const item = tab.items[i];
+    item.checked = !item.checked;
+    if (item.checked) {
+      if (!item.date) item.date = new Date().toISOString().slice(0, 10);
+      launchConfetti(el);
+      const allDone = tab.items.every(x => x.checked);
+      if (allDone && tab.items.length > 0) {
+        setTimeout(() => celebrateToast(`Yeay! ${tab.name} beres semua 🎉`), 150);
+      }
+    }
+    renderCustomItems(tabId);
+  }
+
+  function setCustomItemDate(tabId, i, val) {
+    const tab = customTabs.find(t => t.id === tabId);
+    tab.items[i].date = val;
+  }
+
+  function removeCustomItem(tabId, i) {
+    const tab = customTabs.find(t => t.id === tabId);
+    tab.items.splice(i, 1);
+    renderCustomItems(tabId);
+  }
+  function renameCustomItem(tabId, i, el) {
+    const tab = customTabs.find(t => t.id === tabId);
+    editInline(el, tab.items[i].name, v => { if (v) tab.items[i].name = v; renderCustomItems(tabId); });
+  }
+
+  /* ---------- init ---------- */
+  renderGroups();
+  renderJadwal();
+  renderTamu();
+  renderVendor();
+  renderKeuangan();
+  renderCustomTabs();
+  updateCountdown();
+</script>
+
+</body>
+</html>
