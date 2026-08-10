@@ -497,33 +497,30 @@
 
   <!-- JADWAL -->
   <div class="tab-panel" id="panel-jadwal">
-    <div class="row-form">
-      <input type="text" id="jadwalNamaInput" placeholder="Nama acara (mis. Akad Nikah)">
-      <input type="date" id="jadwalTanggalInput" style="max-width:140px;">
-      <input type="time" id="jadwalJamInput" style="max-width:100px;">
-      <button class="add" onclick="addJadwal()">Tambah</button>
+    <div class="new-group">
+      <input type="text" id="jadwalGroupInput" placeholder="Nama kategori, mis. Akad">
+      <button class="add" onclick="addJadwalGroup()">+ Kategori</button>
     </div>
-    <ul id="listJadwal"></ul>
+    <div id="jadwalGroups"></div>
   </div>
 
   <!-- TAMU -->
   <div class="tab-panel" id="panel-tamu">
-    <div class="row-form">
-      <input type="text" id="tamuInput" placeholder="Nama tamu / rombongan">
-      <button class="add" onclick="addTamu()">Tambah</button>
+    <div class="new-group">
+      <input type="text" id="tamuGroupInput" placeholder="Nama kategori, mis. Keluarga">
+      <button class="add" onclick="addTamuGroup()">+ Kategori</button>
     </div>
-    <ul id="listTamu"></ul>
+    <div id="tamuGroups"></div>
   </div>
 
   <!-- VENDOR -->
   <div class="tab-panel" id="panel-vendor">
-    <div class="row-form">
-      <input type="text" id="vendorInput" placeholder="Nama vendor (mis. Catering, MUA)">
-      <input type="text" id="vendorHargaInput" placeholder="Harga (opsional)" style="max-width:120px;">
-      <button class="add" onclick="addVendor()">Tambah</button>
+    <div class="new-group">
+      <input type="text" id="vendorGroupInput" placeholder="Nama kategori, mis. Katering">
+      <button class="add" onclick="addVendorGroup()">+ Kategori</button>
     </div>
     <p class="subtitle" style="margin-top:-8px;">Centang kalau sudah DP / lunas.</p>
-    <ul id="listVendor"></ul>
+    <div id="vendorGroups"></div>
   </div>
 
   <!-- KEUANGAN -->
@@ -543,28 +540,11 @@
       </div>
     </div>
 
-    <div class="kv-tabs">
-      <button class="kv-toggle active in" id="btnIn" onclick="setKvType('masuk')">+ Catat sebagai Masuk</button>
-      <button class="kv-toggle out" id="btnOut" onclick="setKvType('keluar')">− Catat sebagai Keluar</button>
+    <div class="new-group">
+      <input type="text" id="kvGroupInput" placeholder="Nama kategori, mis. Sewa Gedung">
+      <button class="add" onclick="addKvGroup()">+ Kategori</button>
     </div>
-
-    <div class="row-form">
-      <input type="text" id="kvNameInput" placeholder="Keterangan (mis. Angpau tamu / DP catering)">
-      <input type="number" id="kvAmountInput" placeholder="Jumlah" style="max-width:110px;">
-      <button class="add" onclick="addTransaksi()">Catat</button>
-    </div>
-
-    <div class="group-header" style="border-color: var(--check-green);">
-      <span class="group-title" style="color: var(--check-green);">+ Uang Masuk</span>
-      <span class="tally" style="background: var(--check-green); box-shadow: 0 2px 5px rgba(74,124,89,0.35);" id="tallyMasuk">Rp 0</span>
-    </div>
-    <ul id="listMasuk"></ul>
-
-    <div class="group-header" style="border-color: var(--margin-red); margin-top: 20px;">
-      <span class="group-title" style="color: var(--margin-red);">− Uang Keluar</span>
-      <span class="tally" id="tallyKeluar">Rp 0</span>
-    </div>
-    <ul id="listKeluar"></ul>
+    <div id="kvGroups"></div>
   </div>
 
   <!-- CUSTOM TABS -->
@@ -591,11 +571,10 @@
 
   /* ---------- state ---------- */
   let groups = [{ name: 'Surat Nikah', items: [{ name: 'KTP', checked: false }, { name: 'KK', checked: false }] }];
-  let jadwal = []; // { nama, tanggal, jam }
-  let tamu = [];
-  let vendor = [];
-  let keuangan = []; // { name, amount, type: 'masuk'|'keluar' }
-  let kvType = 'masuk';
+  let jadwal = []; // [{ name, items: [{ nama, tanggal, jam }] }]
+  let tamu = []; // [{ name, items: [{ name, checked, date }] }]
+  let vendor = []; // [{ name, items: [{ name, harga, checked, date }] }]
+  let keuangan = []; // [{ name, items: [{ name, amount, type: 'masuk'|'keluar' }] }]
 
   const CHECK_SVG = `<svg viewBox="0 0 21 21"><path d="M4 11 L9 16 L18 6"/></svg>`;
 
@@ -844,11 +823,17 @@
 
   groupInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addGroup(); });
 
+  /* ---------- kategori helpers ---------- */
+  // ponytail: data lama (array flat) dibungkus jadi 1 kategori "Umum" biar gak ilang
+  function migrateToGroups(arr) {
+    if (!Array.isArray(arr) || arr.length === 0) return [];
+    if (arr[0] && Array.isArray(arr[0].items)) return arr;
+    return [{ name: 'Umum', items: arr }];
+  }
+
   /* ---------- JADWAL ---------- */
-  const jadwalNamaEl = document.getElementById('jadwalNamaInput');
-  const jadwalTanggalEl = document.getElementById('jadwalTanggalInput');
-  const jadwalJamEl = document.getElementById('jadwalJamInput');
-  const listJadwalEl = document.getElementById('listJadwal');
+  const jadwalGroupsEl = document.getElementById('jadwalGroups');
+  const jadwalGroupInputEl = document.getElementById('jadwalGroupInput');
 
   function formatTanggalIndo(dateStr) {
     if (!dateStr) return '';
@@ -858,184 +843,312 @@
 
   function renderJadwal() {
     saveState();
-    listJadwalEl.innerHTML = '';
-    if (jadwal.length === 0) { listJadwalEl.innerHTML = '<div class="empty">Belum ada acara dijadwalkan…</div>'; return; }
-    const sorted = jadwal.slice().sort((a, b) => `${a.tanggal}T${a.jam || '00:00'}`.localeCompare(`${b.tanggal}T${b.jam || '00:00'}`));
-    sorted.forEach((j) => {
-      const i = jadwal.indexOf(j);
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <span class="name" title="klik utk edit" onclick="renameJadwal(${i},this)">${escapeHtml(j.nama)}</span>
-        <span class="jadwal-badge">${formatTanggalIndo(j.tanggal)}${j.jam ? ' · ' + j.jam : ''}</span>
-        <button class="del" aria-label="Hapus ${j.nama}" onclick="removeJadwal(${i})">✕</button>`;
-      listJadwalEl.appendChild(li);
+    jadwalGroupsEl.innerHTML = '';
+    if (jadwal.length === 0) { jadwalGroupsEl.innerHTML = '<div class="empty">Belum ada kategori…</div>'; return; }
+    jadwal.forEach((group, gi) => {
+      const div = document.createElement('div');
+      div.className = 'group';
+      div.innerHTML = `
+        <div class="group-header">
+          <span class="group-title" title="klik utk edit" onclick="renameJadwalGroup(${gi},this)">${escapeHtml(group.name)}</span>
+          <button class="del-group" aria-label="Hapus kategori ${group.name}" onclick="removeJadwalGroup(${gi})">✕</button>
+        </div>
+        <ul id="jadwalList-${gi}"></ul>
+        <div class="item-input-row" style="flex-wrap:wrap;">
+          <input type="text" id="jadwalNama-${gi}" placeholder="Nama acara (mis. Akad Nikah)">
+          <input type="date" id="jadwalTanggal-${gi}" style="max-width:140px;">
+          <input type="time" id="jadwalJam-${gi}" style="max-width:100px;">
+          <button onclick="addJadwal(${gi})">Tambah</button>
+        </div>`;
+      jadwalGroupsEl.appendChild(div);
+
+      const listEl = div.querySelector(`#jadwalList-${gi}`);
+      const sorted = group.items.slice().sort((a, b) => `${a.tanggal}T${a.jam || '00:00'}`.localeCompare(`${b.tanggal}T${b.jam || '00:00'}`));
+      sorted.forEach((j) => {
+        const ii = group.items.indexOf(j);
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span class="name" title="klik utk edit" onclick="renameJadwal(${gi},${ii},this)">${escapeHtml(j.nama)}</span>
+          <span class="jadwal-badge">${formatTanggalIndo(j.tanggal)}${j.jam ? ' · ' + j.jam : ''}</span>
+          <button class="del" aria-label="Hapus ${j.nama}" onclick="removeJadwal(${gi},${ii})">✕</button>`;
+        listEl.appendChild(li);
+      });
+
+      div.querySelector(`#jadwalNama-${gi}`).addEventListener('keydown', e => { if (e.key === 'Enter') addJadwal(gi); });
     });
   }
 
-  function addJadwal() {
-    const nama = jadwalNamaEl.value.trim();
-    const tanggal = jadwalTanggalEl.value;
-    const jam = jadwalJamEl.value;
-    if (!nama || !tanggal) return;
-    jadwal.push({ nama, tanggal, jam });
-    jadwalNamaEl.value = ''; jadwalTanggalEl.value = ''; jadwalJamEl.value = '';
-    jadwalNamaEl.focus();
+  function addJadwalGroup() {
+    const val = jadwalGroupInputEl.value.trim();
+    if (!val) return;
+    jadwal.push({ name: val, items: [] });
+    jadwalGroupInputEl.value = ''; jadwalGroupInputEl.focus();
     renderJadwal();
   }
-  function removeJadwal(i) { if (!requireUnlock()) return; jadwal.splice(i, 1); renderJadwal(); saveState(); }
-  function renameJadwal(i, el) { editInline(el, jadwal[i].nama, v => { if (v) jadwal[i].nama = v; renderJadwal(); }); }
-  jadwalNamaEl.addEventListener('keydown', e => { if (e.key === 'Enter') addJadwal(); });
+  function removeJadwalGroup(gi) { if (!requireUnlock()) return; jadwal.splice(gi, 1); renderJadwal(); saveState(); }
+  function renameJadwalGroup(gi, el) { editInline(el, jadwal[gi].name, v => { if (v) jadwal[gi].name = v; renderJadwal(); }); }
+  function addJadwal(gi) {
+    const namaEl = document.getElementById(`jadwalNama-${gi}`);
+    const tanggalEl = document.getElementById(`jadwalTanggal-${gi}`);
+    const jamEl = document.getElementById(`jadwalJam-${gi}`);
+    const nama = namaEl.value.trim();
+    const tanggal = tanggalEl.value;
+    const jam = jamEl.value;
+    if (!nama || !tanggal) return;
+    jadwal[gi].items.push({ nama, tanggal, jam });
+    renderJadwal();
+    const ni = document.getElementById(`jadwalNama-${gi}`);
+    if (ni) ni.focus();
+  }
+  function removeJadwal(gi, ii) { if (!requireUnlock()) return; jadwal[gi].items.splice(ii, 1); renderJadwal(); saveState(); }
+  function renameJadwal(gi, ii, el) { editInline(el, jadwal[gi].items[ii].nama, v => { if (v) jadwal[gi].items[ii].nama = v; renderJadwal(); }); }
+  jadwalGroupInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addJadwalGroup(); });
 
   /* ---------- TAMU ---------- */
-  const tamuInputEl = document.getElementById('tamuInput');
-  const listTamuEl = document.getElementById('listTamu');
+  const tamuGroupsEl = document.getElementById('tamuGroups');
+  const tamuGroupInputEl = document.getElementById('tamuGroupInput');
 
   function renderTamu() {
     saveState();
-    listTamuEl.innerHTML = '';
-    if (tamu.length === 0) { listTamuEl.innerHTML = '<div class="empty">Belum ada tamu dicatat…</div>'; return; }
-    tamu.forEach((t, i) => {
-      const li = document.createElement('li');
-      if (t.checked) li.classList.add('checked');
-      li.innerHTML = `
-        <button class="check-box" aria-label="Tandai hadir ${t.name}" onclick="toggleTamu(${i},this)">${CHECK_SVG}</button>
-        <span class="name" title="klik utk edit" onclick="renameTamu(${i},this)">${escapeHtml(t.name)}</span>
-        ${t.checked ? `<input type="date" class="item-date" value="${t.date || ''}" onchange="setTamuDate(${i},this.value)">` : ''}
-        <button class="del" aria-label="Hapus ${t.name}" onclick="removeTamu(${i})">✕</button>`;
-      listTamuEl.appendChild(li);
+    tamuGroupsEl.innerHTML = '';
+    if (tamu.length === 0) { tamuGroupsEl.innerHTML = '<div class="empty">Belum ada kategori…</div>'; return; }
+    tamu.forEach((group, gi) => {
+      const hadir = group.items.filter(x => x.checked).length;
+      const div = document.createElement('div');
+      div.className = 'group';
+      div.innerHTML = `
+        <div class="group-header">
+          <span class="group-title" title="klik utk edit" onclick="renameTamuGroup(${gi},this)">${escapeHtml(group.name)}</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="tally">${hadir} / ${group.items.length}</span>
+            <button class="del-group" aria-label="Hapus kategori ${group.name}" onclick="removeTamuGroup(${gi})">✕</button>
+          </div>
+        </div>
+        <ul id="tamuList-${gi}"></ul>
+        <div class="item-input-row">
+          <input type="text" id="tamuInput-${gi}" placeholder="Nama tamu / rombongan">
+          <button onclick="addTamu(${gi})">Tambah</button>
+        </div>`;
+      tamuGroupsEl.appendChild(div);
+
+      const listEl = div.querySelector(`#tamuList-${gi}`);
+      group.items.forEach((t, ii) => {
+        const li = document.createElement('li');
+        if (t.checked) li.classList.add('checked');
+        li.innerHTML = `
+          <button class="check-box" aria-label="Tandai hadir ${t.name}" onclick="toggleTamu(${gi},${ii},this)">${CHECK_SVG}</button>
+          <span class="name" title="klik utk edit" onclick="renameTamu(${gi},${ii},this)">${escapeHtml(t.name)}</span>
+          ${t.checked ? `<input type="date" class="item-date" value="${t.date || ''}" onchange="setTamuDate(${gi},${ii},this.value)">` : ''}
+          <button class="del" aria-label="Hapus ${t.name}" onclick="removeTamu(${gi},${ii})">✕</button>`;
+        listEl.appendChild(li);
+      });
+
+      div.querySelector(`#tamuInput-${gi}`).addEventListener('keydown', e => { if (e.key === 'Enter') addTamu(gi); });
     });
   }
-  function addTamu() {
-    const val = tamuInputEl.value.trim();
+  function addTamuGroup() {
+    const val = tamuGroupInputEl.value.trim();
     if (!val) return;
-    tamu.push({ name: val, checked: false });
-    tamuInputEl.value = ''; tamuInputEl.focus();
+    tamu.push({ name: val, items: [] });
+    tamuGroupInputEl.value = ''; tamuGroupInputEl.focus();
     renderTamu();
   }
-  function toggleTamu(i, el) {
-    tamu[i].checked = !tamu[i].checked;
-    if (tamu[i].checked) {
-      if (!tamu[i].date) tamu[i].date = new Date().toISOString().slice(0, 10);
+  function removeTamuGroup(gi) { if (!requireUnlock()) return; tamu.splice(gi, 1); renderTamu(); saveState(); }
+  function renameTamuGroup(gi, el) { editInline(el, tamu[gi].name, v => { if (v) tamu[gi].name = v; renderTamu(); }); }
+  function addTamu(gi) {
+    const inputEl = document.getElementById(`tamuInput-${gi}`);
+    const val = inputEl.value.trim();
+    if (!val) return;
+    tamu[gi].items.push({ name: val, checked: false });
+    renderTamu();
+    const ni = document.getElementById(`tamuInput-${gi}`);
+    if (ni) ni.focus();
+  }
+  function toggleTamu(gi, ii, el) {
+    const t = tamu[gi].items[ii];
+    t.checked = !t.checked;
+    if (t.checked) {
+      if (!t.date) t.date = new Date().toISOString().slice(0, 10);
       launchConfetti(el);
     }
     renderTamu();
   }
-  function setTamuDate(i, val) { tamu[i].date = val; }
-  function removeTamu(i) { if (!requireUnlock()) return; tamu.splice(i, 1); renderTamu(); saveState(); }
-  function renameTamu(i, el) { editInline(el, tamu[i].name, v => { if (v) tamu[i].name = v; renderTamu(); }); }
-  tamuInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addTamu(); });
+  function setTamuDate(gi, ii, val) { tamu[gi].items[ii].date = val; }
+  function removeTamu(gi, ii) { if (!requireUnlock()) return; tamu[gi].items.splice(ii, 1); renderTamu(); saveState(); }
+  function renameTamu(gi, ii, el) { editInline(el, tamu[gi].items[ii].name, v => { if (v) tamu[gi].items[ii].name = v; renderTamu(); }); }
+  tamuGroupInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addTamuGroup(); });
 
   /* ---------- VENDOR ---------- */
-  const vendorInputEl = document.getElementById('vendorInput');
-  const vendorHargaInputEl = document.getElementById('vendorHargaInput');
-  const listVendorEl = document.getElementById('listVendor');
+  const vendorGroupsEl = document.getElementById('vendorGroups');
+  const vendorGroupInputEl = document.getElementById('vendorGroupInput');
 
   function renderVendor() {
     saveState();
-    listVendorEl.innerHTML = '';
-    if (vendor.length === 0) { listVendorEl.innerHTML = '<div class="empty">Belum ada vendor dicatat…</div>'; return; }
-    vendor.forEach((v, i) => {
-      const li = document.createElement('li');
-      if (v.checked) li.classList.add('checked');
-      li.innerHTML = `
-        <button class="check-box" aria-label="Tandai lunas ${v.name}" onclick="toggleVendor(${i},this)">${CHECK_SVG}</button>
-        <span class="name" title="klik utk edit" onclick="renameVendor(${i},this)">${escapeHtml(v.name)}</span>
-        <span class="meta" title="klik utk edit harga" onclick="editVendorHarga(${i},this)">${v.harga ? escapeHtml(v.harga) : '—'}</span>
-        ${v.checked ? `<input type="date" class="item-date" value="${v.date || ''}" onchange="setVendorDate(${i},this.value)">` : ''}
-        <button class="del" aria-label="Hapus ${v.name}" onclick="removeVendor(${i})">✕</button>`;
-      listVendorEl.appendChild(li);
+    vendorGroupsEl.innerHTML = '';
+    if (vendor.length === 0) { vendorGroupsEl.innerHTML = '<div class="empty">Belum ada kategori…</div>'; return; }
+    vendor.forEach((group, gi) => {
+      const lunas = group.items.filter(x => x.checked).length;
+      const div = document.createElement('div');
+      div.className = 'group';
+      div.innerHTML = `
+        <div class="group-header">
+          <span class="group-title" title="klik utk edit" onclick="renameVendorGroup(${gi},this)">${escapeHtml(group.name)}</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="tally">${lunas} / ${group.items.length}</span>
+            <button class="del-group" aria-label="Hapus kategori ${group.name}" onclick="removeVendorGroup(${gi})">✕</button>
+          </div>
+        </div>
+        <ul id="vendorList-${gi}"></ul>
+        <div class="item-input-row">
+          <input type="text" id="vendorInput-${gi}" placeholder="Nama vendor (mis. Catering, MUA)">
+          <input type="text" id="vendorHarga-${gi}" placeholder="Harga (opsional)" style="max-width:120px;">
+          <button onclick="addVendor(${gi})">Tambah</button>
+        </div>`;
+      vendorGroupsEl.appendChild(div);
+
+      const listEl = div.querySelector(`#vendorList-${gi}`);
+      group.items.forEach((v, ii) => {
+        const li = document.createElement('li');
+        if (v.checked) li.classList.add('checked');
+        li.innerHTML = `
+          <button class="check-box" aria-label="Tandai lunas ${v.name}" onclick="toggleVendor(${gi},${ii},this)">${CHECK_SVG}</button>
+          <span class="name" title="klik utk edit" onclick="renameVendor(${gi},${ii},this)">${escapeHtml(v.name)}</span>
+          <span class="meta" title="klik utk edit harga" onclick="editVendorHarga(${gi},${ii},this)">${v.harga ? escapeHtml(v.harga) : '—'}</span>
+          ${v.checked ? `<input type="date" class="item-date" value="${v.date || ''}" onchange="setVendorDate(${gi},${ii},this.value)">` : ''}
+          <button class="del" aria-label="Hapus ${v.name}" onclick="removeVendor(${gi},${ii})">✕</button>`;
+        listEl.appendChild(li);
+      });
+
+      div.querySelector(`#vendorInput-${gi}`).addEventListener('keydown', e => { if (e.key === 'Enter') addVendor(gi); });
+      div.querySelector(`#vendorHarga-${gi}`).addEventListener('keydown', e => { if (e.key === 'Enter') addVendor(gi); });
     });
   }
-  function addVendor() {
-    const val = vendorInputEl.value.trim();
+  function addVendorGroup() {
+    const val = vendorGroupInputEl.value.trim();
     if (!val) return;
-    vendor.push({ name: val, harga: vendorHargaInputEl.value.trim(), checked: false });
-    vendorInputEl.value = ''; vendorHargaInputEl.value = ''; vendorInputEl.focus();
+    vendor.push({ name: val, items: [] });
+    vendorGroupInputEl.value = ''; vendorGroupInputEl.focus();
     renderVendor();
   }
-  function toggleVendor(i, el) {
-    vendor[i].checked = !vendor[i].checked;
-    if (vendor[i].checked) {
-      if (!vendor[i].date) vendor[i].date = new Date().toISOString().slice(0, 10);
+  function removeVendorGroup(gi) { if (!requireUnlock()) return; vendor.splice(gi, 1); renderVendor(); saveState(); }
+  function renameVendorGroup(gi, el) { editInline(el, vendor[gi].name, v => { if (v) vendor[gi].name = v; renderVendor(); }); }
+  function addVendor(gi) {
+    const inputEl = document.getElementById(`vendorInput-${gi}`);
+    const hargaEl = document.getElementById(`vendorHarga-${gi}`);
+    const val = inputEl.value.trim();
+    if (!val) return;
+    vendor[gi].items.push({ name: val, harga: hargaEl.value.trim(), checked: false });
+    renderVendor();
+    const ni = document.getElementById(`vendorInput-${gi}`);
+    if (ni) ni.focus();
+  }
+  function toggleVendor(gi, ii, el) {
+    const v = vendor[gi].items[ii];
+    v.checked = !v.checked;
+    if (v.checked) {
+      if (!v.date) v.date = new Date().toISOString().slice(0, 10);
       launchConfetti(el);
     }
     renderVendor();
   }
-  function setVendorDate(i, val) { vendor[i].date = val; }
-  function removeVendor(i) { if (!requireUnlock()) return; vendor.splice(i, 1); renderVendor(); saveState(); }
-  function renameVendor(i, el) { editInline(el, vendor[i].name, v => { if (v) vendor[i].name = v; renderVendor(); }); }
-  function editVendorHarga(i, el) { editInline(el, vendor[i].harga || '', v => { vendor[i].harga = v || ''; renderVendor(); }); }
-  vendorInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addVendor(); });
-  vendorHargaInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addVendor(); });
+  function setVendorDate(gi, ii, val) { vendor[gi].items[ii].date = val; }
+  function removeVendor(gi, ii) { if (!requireUnlock()) return; vendor[gi].items.splice(ii, 1); renderVendor(); saveState(); }
+  function renameVendor(gi, ii, el) { editInline(el, vendor[gi].items[ii].name, v => { if (v) vendor[gi].items[ii].name = v; renderVendor(); }); }
+  function editVendorHarga(gi, ii, el) { editInline(el, vendor[gi].items[ii].harga || '', v => { vendor[gi].items[ii].harga = v || ''; renderVendor(); }); }
+  vendorGroupInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addVendorGroup(); });
 
   /* ---------- KEUANGAN ---------- */
-  const kvNameInputEl = document.getElementById('kvNameInput');
-  const kvAmountInputEl = document.getElementById('kvAmountInput');
-  const btnIn = document.getElementById('btnIn');
-  const btnOut = document.getElementById('btnOut');
-
-  function setKvType(type) {
-    kvType = type;
-    btnIn.classList.toggle('active', type === 'masuk');
-    btnOut.classList.toggle('active', type === 'keluar');
-  }
-
-  const listMasukEl = document.getElementById('listMasuk');
-  const listKeluarEl = document.getElementById('listKeluar');
+  const kvGroupsEl = document.getElementById('kvGroups');
+  const kvGroupInputEl = document.getElementById('kvGroupInput');
 
   function renderKeuangan() {
     saveState();
-    const masukItems = keuangan.filter(k => k.type === 'masuk');
-    const keluarItems = keuangan.filter(k => k.type === 'keluar');
+    kvGroupsEl.innerHTML = '';
+    let totalMasuk = 0, totalKeluar = 0;
 
-    listMasukEl.innerHTML = masukItems.length === 0 ? '<div class="empty" style="font-size:16px; padding:10px 0;">Belum ada catatan…</div>' : '';
-    masukItems.forEach((k) => {
-      const i = keuangan.indexOf(k);
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <span class="name" title="klik utk edit" onclick="renameTransaksi(${i},this)">${escapeHtml(k.name)}</span>
-        <span class="amount-in" title="klik utk edit jumlah" onclick="editTransaksiAmount(${i},this)">+ ${formatRupiah(k.amount)}</span>
-        <button class="del" aria-label="Hapus transaksi" onclick="removeTransaksi(${i})">✕</button>`;
-      listMasukEl.appendChild(li);
+    if (keuangan.length === 0) { kvGroupsEl.innerHTML = '<div class="empty">Belum ada kategori…</div>'; }
+    keuangan.forEach((group, gi) => {
+      const groupMasuk = group.items.filter(k => k.type === 'masuk').reduce((s, k) => s + k.amount, 0);
+      const groupKeluar = group.items.filter(k => k.type === 'keluar').reduce((s, k) => s + k.amount, 0);
+      totalMasuk += groupMasuk; totalKeluar += groupKeluar;
+
+      const div = document.createElement('div');
+      div.className = 'group';
+      div.innerHTML = `
+        <div class="group-header">
+          <span class="group-title" title="klik utk edit" onclick="renameKvGroup(${gi},this)">${escapeHtml(group.name)}</span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="tally">${formatRupiah(groupMasuk - groupKeluar)}</span>
+            <button class="del-group" aria-label="Hapus kategori ${group.name}" onclick="removeKvGroup(${gi})">✕</button>
+          </div>
+        </div>
+        <ul id="kvList-${gi}"></ul>
+        <div class="item-input-row" style="flex-wrap:wrap;">
+          <input type="text" id="kvName-${gi}" placeholder="Keterangan (mis. Angpau tamu / DP catering)">
+          <input type="number" id="kvAmount-${gi}" placeholder="Jumlah" style="max-width:110px;">
+          <button class="kv-toggle active in" id="kvBtnIn-${gi}" onclick="setKvType(${gi},'masuk')" type="button">+ Masuk</button>
+          <button class="kv-toggle out" id="kvBtnOut-${gi}" onclick="setKvType(${gi},'keluar')" type="button">− Keluar</button>
+          <button onclick="addTransaksi(${gi})">Catat</button>
+        </div>`;
+      kvGroupsEl.appendChild(div);
+
+      const listEl = div.querySelector(`#kvList-${gi}`);
+      group.items.forEach((k, ii) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span class="name" title="klik utk edit" onclick="renameTransaksi(${gi},${ii},this)">${escapeHtml(k.name)}</span>
+          <span class="${k.type === 'masuk' ? 'amount-in' : 'amount-out'}" title="klik utk edit jumlah" onclick="editTransaksiAmount(${gi},${ii},this)">${k.type === 'masuk' ? '+' : '−'} ${formatRupiah(k.amount)}</span>
+          <button class="del" aria-label="Hapus transaksi" onclick="removeTransaksi(${gi},${ii})">✕</button>`;
+        listEl.appendChild(li);
+      });
+
+      div.querySelector(`#kvName-${gi}`).addEventListener('keydown', e => { if (e.key === 'Enter') addTransaksi(gi); });
+      div.querySelector(`#kvAmount-${gi}`).addEventListener('keydown', e => { if (e.key === 'Enter') addTransaksi(gi); });
     });
 
-    listKeluarEl.innerHTML = keluarItems.length === 0 ? '<div class="empty" style="font-size:16px; padding:10px 0;">Belum ada catatan…</div>' : '';
-    keluarItems.forEach((k) => {
-      const i = keuangan.indexOf(k);
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <span class="name" title="klik utk edit" onclick="renameTransaksi(${i},this)">${escapeHtml(k.name)}</span>
-        <span class="amount-out" title="klik utk edit jumlah" onclick="editTransaksiAmount(${i},this)">− ${formatRupiah(k.amount)}</span>
-        <button class="del" aria-label="Hapus transaksi" onclick="removeTransaksi(${i})">✕</button>`;
-      listKeluarEl.appendChild(li);
-    });
-
-    const masuk = masukItems.reduce((s, k) => s + k.amount, 0);
-    const keluar = keluarItems.reduce((s, k) => s + k.amount, 0);
-    document.getElementById('totalMasuk').textContent = formatRupiah(masuk);
-    document.getElementById('totalKeluar').textContent = formatRupiah(keluar);
-    document.getElementById('totalSaldo').textContent = formatRupiah(masuk - keluar);
-    document.getElementById('tallyMasuk').textContent = formatRupiah(masuk);
-    document.getElementById('tallyKeluar').textContent = formatRupiah(keluar);
+    document.getElementById('totalMasuk').textContent = formatRupiah(totalMasuk);
+    document.getElementById('totalKeluar').textContent = formatRupiah(totalKeluar);
+    document.getElementById('totalSaldo').textContent = formatRupiah(totalMasuk - totalKeluar);
   }
 
-  function addTransaksi() {
-    const name = kvNameInputEl.value.trim();
-    const amount = parseFloat(kvAmountInputEl.value);
-    if (!name || !amount || amount <= 0) return;
-    keuangan.push({ name, amount, type: kvType });
-    kvNameInputEl.value = ''; kvAmountInputEl.value = ''; kvNameInputEl.focus();
+  let kvTypeByGroup = {};
+  function setKvType(gi, type) {
+    kvTypeByGroup[gi] = type;
+    const btnIn = document.getElementById(`kvBtnIn-${gi}`);
+    const btnOut = document.getElementById(`kvBtnOut-${gi}`);
+    if (btnIn) btnIn.classList.toggle('active', type === 'masuk');
+    if (btnOut) btnOut.classList.toggle('active', type === 'keluar');
+  }
+  function addKvGroup() {
+    const val = kvGroupInputEl.value.trim();
+    if (!val) return;
+    keuangan.push({ name: val, items: [] });
+    kvGroupInputEl.value = ''; kvGroupInputEl.focus();
     renderKeuangan();
   }
-  function removeTransaksi(i) { if (!requireUnlock()) return; keuangan.splice(i, 1); renderKeuangan(); saveState(); }
-  function renameTransaksi(i, el) { editInline(el, keuangan[i].name, v => { if (v) keuangan[i].name = v; renderKeuangan(); }); }
-  function editTransaksiAmount(i, el) {
-    editInline(el, keuangan[i].amount, v => {
+  function removeKvGroup(gi) { if (!requireUnlock()) return; keuangan.splice(gi, 1); renderKeuangan(); saveState(); }
+  function renameKvGroup(gi, el) { editInline(el, keuangan[gi].name, v => { if (v) keuangan[gi].name = v; renderKeuangan(); }); }
+  function addTransaksi(gi) {
+    const nameEl = document.getElementById(`kvName-${gi}`);
+    const amountEl = document.getElementById(`kvAmount-${gi}`);
+    const name = nameEl.value.trim();
+    const amount = parseFloat(amountEl.value);
+    if (!name || !amount || amount <= 0) return;
+    keuangan[gi].items.push({ name, amount, type: kvTypeByGroup[gi] || 'masuk' });
+    renderKeuangan();
+    const ni = document.getElementById(`kvName-${gi}`);
+    if (ni) ni.focus();
+  }
+  function removeTransaksi(gi, ii) { if (!requireUnlock()) return; keuangan[gi].items.splice(ii, 1); renderKeuangan(); saveState(); }
+  function renameTransaksi(gi, ii, el) { editInline(el, keuangan[gi].items[ii].name, v => { if (v) keuangan[gi].items[ii].name = v; renderKeuangan(); }); }
+  function editTransaksiAmount(gi, ii, el) {
+    editInline(el, keuangan[gi].items[ii].amount, v => {
       const n = parseFloat(v);
-      if (v && n > 0) keuangan[i].amount = n;
+      if (v && n > 0) keuangan[gi].items[ii].amount = n;
       renderKeuangan();
     });
   }
+  kvGroupInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addKvGroup(); });
   kvNameInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addTransaksi(); });
   kvAmountInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addTransaksi(); });
 
@@ -1172,10 +1285,10 @@
       if (saved) {
         if (saved.weddingDate) dateEl.value = saved.weddingDate;
         if (saved.groups) groups = saved.groups;
-        if (saved.jadwal) jadwal = saved.jadwal;
-        if (saved.tamu) tamu = saved.tamu;
-        if (saved.vendor) vendor = saved.vendor;
-        if (saved.keuangan) keuangan = saved.keuangan;
+        if (saved.jadwal) jadwal = migrateToGroups(saved.jadwal);
+        if (saved.tamu) tamu = migrateToGroups(saved.tamu);
+        if (saved.vendor) vendor = migrateToGroups(saved.vendor);
+        if (saved.keuangan) keuangan = migrateToGroups(saved.keuangan);
         if (saved.customTabs) customTabs = saved.customTabs;
         if (saved.customCounter) customCounter = saved.customCounter;
         if (saved.hiddenTabs) hiddenTabs = saved.hiddenTabs;
