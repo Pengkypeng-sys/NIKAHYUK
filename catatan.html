@@ -473,14 +473,15 @@
     <span class="countdown" id="countdown"></span>
   </div>
 
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist</button>
-    <button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal</button>
-    <button class="tab-btn" data-tab="tamu" onclick="switchTab('tamu')">👥 Tamu</button>
-    <button class="tab-btn" data-tab="vendor" onclick="switchTab('vendor')">🛠️ Vendor</button>
-    <button class="tab-btn" data-tab="keuangan" onclick="switchTab('keuangan')">💰 Keuangan</button>
+  <div class="tabs" id="defaultTabs">
+    <button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist <button class="tab-close" onclick="event.stopPropagation(); hideTab('checklist')" title="Sembunyikan tab">✕</button></button>
+    <button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal <button class="tab-close" onclick="event.stopPropagation(); hideTab('jadwal')" title="Sembunyikan tab">✕</button></button>
+    <button class="tab-btn" data-tab="tamu" onclick="switchTab('tamu')">👥 Tamu <button class="tab-close" onclick="event.stopPropagation(); hideTab('tamu')" title="Sembunyikan tab">✕</button></button>
+    <button class="tab-btn" data-tab="vendor" onclick="switchTab('vendor')">🛠️ Vendor <button class="tab-close" onclick="event.stopPropagation(); hideTab('vendor')" title="Sembunyikan tab">✕</button></button>
+    <button class="tab-btn" data-tab="keuangan" onclick="switchTab('keuangan')">💰 Keuangan <button class="tab-close" onclick="event.stopPropagation(); hideTab('keuangan')" title="Sembunyikan tab">✕</button></button>
     <span id="customTabBtns"></span>
     <button class="tab-add-btn" onclick="addCustomTab()" title="Tambah tab baru">+</button>
+    <span id="hiddenTabsBox"></span>
   </div>
 
   <!-- CHECKLIST -->
@@ -580,7 +581,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          weddingDate: dateEl.value, groups, jadwal, tamu, vendor, keuangan, customTabs, customCounter
+          weddingDate: dateEl.value, groups, jadwal, tamu, vendor, keuangan, customTabs, customCounter, hiddenTabs
         })
       }).catch(() => {});
     }, 400);
@@ -597,9 +598,34 @@
   const CHECK_SVG = `<svg viewBox="0 0 21 21"><path d="M4 11 L9 16 L18 6"/></svg>`;
 
   /* ---------- tabs ---------- */
+  const TAB_LABELS = { checklist: '✅ Checklist', jadwal: '📅 Jadwal', tamu: '👥 Tamu', vendor: '🛠️ Vendor', keuangan: '💰 Keuangan' };
+  let hiddenTabs = [];
+
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
+  }
+
+  function hideTab(tab) {
+    if (!hiddenTabs.includes(tab)) hiddenTabs.push(tab);
+    const btn = document.querySelector(`#defaultTabs .tab-btn[data-tab="${tab}"]`);
+    if (btn && btn.classList.contains('active')) switchTab('checklist');
+    renderHiddenTabs();
+    saveState();
+  }
+
+  function unhideTab(tab) {
+    hiddenTabs = hiddenTabs.filter(t => t !== tab);
+    renderHiddenTabs();
+    saveState();
+  }
+
+  function renderHiddenTabs() {
+    document.querySelectorAll('#defaultTabs .tab-btn[data-tab]').forEach(b => {
+      b.style.display = hiddenTabs.includes(b.dataset.tab) ? 'none' : '';
+    });
+    const box = document.getElementById('hiddenTabsBox');
+    box.innerHTML = hiddenTabs.map(t => `<button class="tab-add-btn" onclick="unhideTab('${t}')" title="Tampilkan lagi">↩ ${TAB_LABELS[t]}</button>`).join('');
   }
 
   /* ---------- countdown ---------- */
@@ -1110,6 +1136,7 @@
         if (saved.keuangan) keuangan = saved.keuangan;
         if (saved.customTabs) customTabs = saved.customTabs;
         if (saved.customCounter) customCounter = saved.customCounter;
+        if (saved.hiddenTabs) hiddenTabs = saved.hiddenTabs;
       }
     } catch (e) {}
     isLoaded = true;
@@ -1119,6 +1146,7 @@
     renderVendor();
     renderKeuangan();
     renderCustomTabs();
+    renderHiddenTabs();
     updateCountdown();
   })();
 </script>
