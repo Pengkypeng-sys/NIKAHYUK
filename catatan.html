@@ -467,6 +467,8 @@
   <h1>Bismillah Nikah Yuk</h1>
   <p class="subtitle">Semua catatan persiapan nikah, dalam satu tempat.</p>
 
+  <button id="lockBtn" class="tab-add-btn" onclick="toggleLock()" style="width:auto;padding:4px 10px;">🔒 Terkunci</button>
+
   <div class="date-box">
     <label for="weddingDate">📅 Tanggal akad</label>
     <input type="date" id="weddingDate">
@@ -581,7 +583,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          weddingDate: dateEl.value, groups, jadwal, tamu, vendor, keuangan, customTabs, customCounter, hiddenTabs
+          weddingDate: dateEl.value, groups, jadwal, tamu, vendor, keuangan, customTabs, customCounter, hiddenTabs, lockPin
         })
       }).catch(() => {});
     }, 400);
@@ -597,6 +599,42 @@
 
   const CHECK_SVG = `<svg viewBox="0 0 21 21"><path d="M4 11 L9 16 L18 6"/></svg>`;
 
+  /* ---------- lock ---------- */
+  // ponytail: PIN disimpen polos di state server, cuma buat cegah hapus/edit gak sengaja, bukan security beneran (API publik)
+  let lockPin = null;
+  let unlocked = false;
+
+  function toggleLock() {
+    if (unlocked) {
+      unlocked = false;
+      updateLockBtn();
+      return;
+    }
+    if (!lockPin) {
+      const pin = prompt('Buat PIN kunci (biar orang lain gak asal hapus/edit):');
+      if (!pin || !pin.trim()) return;
+      lockPin = pin.trim();
+      unlocked = true;
+      saveState();
+    } else {
+      const pin = prompt('Masukin PIN buat buka kunci:');
+      if (pin === null) return;
+      if (pin.trim() !== lockPin) { alert('PIN salah.'); return; }
+      unlocked = true;
+    }
+    updateLockBtn();
+  }
+
+  function updateLockBtn() {
+    const btn = document.getElementById('lockBtn');
+    btn.textContent = unlocked ? '🔓 Terbuka' : '🔒 Terkunci';
+  }
+
+  function requireUnlock() {
+    if (lockPin && !unlocked) { alert('Lagi dikunci. Klik 🔒 di atas & masukin PIN dulu.'); return false; }
+    return true;
+  }
+
   /* ---------- tabs ---------- */
   const TAB_LABELS = { checklist: '✅ Checklist', jadwal: '📅 Jadwal', tamu: '👥 Tamu', vendor: '🛠️ Vendor', keuangan: '💰 Keuangan' };
   let hiddenTabs = [];
@@ -607,6 +645,7 @@
   }
 
   function hideTab(tab) {
+    if (!requireUnlock()) return;
     if (!hiddenTabs.includes(tab)) hiddenTabs.push(tab);
     const btn = document.querySelector(`#defaultTabs .tab-btn[data-tab="${tab}"]`);
     if (btn && btn.classList.contains('active')) switchTab('checklist');
@@ -652,6 +691,7 @@
   /* ---------- inline edit ---------- */
   // klik nama -> jadi input -> Enter/blur simpan, Escape batal
   function editInline(el, current, onSave) {
+    if (!requireUnlock()) return;
     const input = document.createElement('input');
     input.type = 'text';
     input.value = current;
@@ -774,7 +814,7 @@
     groupInputEl.value = ''; groupInputEl.focus();
     renderGroups();
   }
-  function removeGroup(gi) { groups.splice(gi, 1); renderGroups(); }
+  function removeGroup(gi) { if (!requireUnlock()) return; groups.splice(gi, 1); renderGroups(); saveState(); }
   function renameGroup(gi, el) { editInline(el, groups[gi].name, v => { if (v) groups[gi].name = v; renderGroups(); }); }
   function addItem(gi) {
     const inputEl = document.getElementById(`itemInput-${gi}`);
@@ -799,7 +839,7 @@
     renderGroups();
   }
   function setItemDate(gi, ii, val) { groups[gi].items[ii].date = val; }
-  function removeItem(gi, ii) { groups[gi].items.splice(ii, 1); renderGroups(); }
+  function removeItem(gi, ii) { if (!requireUnlock()) return; groups[gi].items.splice(ii, 1); renderGroups(); saveState(); }
   function renameItem(gi, ii, el) { editInline(el, groups[gi].items[ii].name, v => { if (v) groups[gi].items[ii].name = v; renderGroups(); }); }
 
   groupInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addGroup(); });
@@ -842,7 +882,7 @@
     jadwalNamaEl.focus();
     renderJadwal();
   }
-  function removeJadwal(i) { jadwal.splice(i, 1); renderJadwal(); }
+  function removeJadwal(i) { if (!requireUnlock()) return; jadwal.splice(i, 1); renderJadwal(); saveState(); }
   function renameJadwal(i, el) { editInline(el, jadwal[i].nama, v => { if (v) jadwal[i].nama = v; renderJadwal(); }); }
   jadwalNamaEl.addEventListener('keydown', e => { if (e.key === 'Enter') addJadwal(); });
 
@@ -881,7 +921,7 @@
     renderTamu();
   }
   function setTamuDate(i, val) { tamu[i].date = val; }
-  function removeTamu(i) { tamu.splice(i, 1); renderTamu(); }
+  function removeTamu(i) { if (!requireUnlock()) return; tamu.splice(i, 1); renderTamu(); saveState(); }
   function renameTamu(i, el) { editInline(el, tamu[i].name, v => { if (v) tamu[i].name = v; renderTamu(); }); }
   tamuInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addTamu(); });
 
@@ -922,7 +962,7 @@
     renderVendor();
   }
   function setVendorDate(i, val) { vendor[i].date = val; }
-  function removeVendor(i) { vendor.splice(i, 1); renderVendor(); }
+  function removeVendor(i) { if (!requireUnlock()) return; vendor.splice(i, 1); renderVendor(); saveState(); }
   function renameVendor(i, el) { editInline(el, vendor[i].name, v => { if (v) vendor[i].name = v; renderVendor(); }); }
   function editVendorHarga(i, el) { editInline(el, vendor[i].harga || '', v => { vendor[i].harga = v || ''; renderVendor(); }); }
   vendorInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addVendor(); });
@@ -987,7 +1027,7 @@
     kvNameInputEl.value = ''; kvAmountInputEl.value = ''; kvNameInputEl.focus();
     renderKeuangan();
   }
-  function removeTransaksi(i) { keuangan.splice(i, 1); renderKeuangan(); }
+  function removeTransaksi(i) { if (!requireUnlock()) return; keuangan.splice(i, 1); renderKeuangan(); saveState(); }
   function renameTransaksi(i, el) { editInline(el, keuangan[i].name, v => { if (v) keuangan[i].name = v; renderKeuangan(); }); }
   function editTransaksiAmount(i, el) {
     editInline(el, keuangan[i].amount, v => {
@@ -1016,6 +1056,7 @@
   }
 
   function removeCustomTab(id) {
+    if (!requireUnlock()) return;
     if (!confirm('Hapus tab ini beserta isinya?')) return;
     customTabs = customTabs.filter(t => t.id !== id);
     renderCustomTabs();
@@ -1113,6 +1154,7 @@
   }
 
   function removeCustomItem(tabId, i) {
+    if (!requireUnlock()) return;
     const tab = customTabs.find(t => t.id === tabId);
     tab.items.splice(i, 1);
     renderCustomItems(tabId);
@@ -1137,6 +1179,7 @@
         if (saved.customTabs) customTabs = saved.customTabs;
         if (saved.customCounter) customCounter = saved.customCounter;
         if (saved.hiddenTabs) hiddenTabs = saved.hiddenTabs;
+        if (saved.lockPin) lockPin = saved.lockPin;
       }
     } catch (e) {}
     isLoaded = true;
@@ -1147,6 +1190,7 @@
     renderKeuangan();
     renderCustomTabs();
     renderHiddenTabs();
+    updateLockBtn();
     updateCountdown();
   })();
 </script>
