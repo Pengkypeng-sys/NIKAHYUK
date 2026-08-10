@@ -702,7 +702,12 @@
     else if (diffDays === 0) { countdownEl.textContent = 'HARI INI 🎉'; countdownEl.style.background = 'var(--stamp)'; countdownEl.classList.add('today'); }
     else { countdownEl.textContent = `${Math.abs(diffDays)} hari lalu`; countdownEl.style.background = 'var(--ink-soft)'; countdownEl.classList.remove('today'); }
   }
-  dateEl.addEventListener('change', () => { updateCountdown(); saveState(); });
+  let lastWeddingDate = '';
+  dateEl.addEventListener('change', () => {
+    if (!requireUnlock()) { dateEl.value = lastWeddingDate; return; }
+    lastWeddingDate = dateEl.value;
+    updateCountdown(); saveState();
+  });
 
   function escapeHtml(str) {
     const d = document.createElement('div');
@@ -829,7 +834,7 @@
     });
   }
 
-  function addGroup() {
+  function addGroup() { if (!requireUnlock()) return;
     const val = groupInputEl.value.trim();
     if (!val) return;
     groups.push({ name: val, items: [] });
@@ -838,7 +843,7 @@
   }
   function removeGroup(gi) { if (!requireUnlock()) return; groups.splice(gi, 1); renderGroups(); saveState(); }
   function renameGroup(gi, el) { editInline(el, groups[gi].name, v => { if (v) groups[gi].name = v; renderGroups(); }); }
-  function addItem(gi) {
+  function addItem(gi) { if (!requireUnlock()) return;
     const inputEl = document.getElementById(`itemInput-${gi}`);
     const val = inputEl.value.trim();
     if (!val) return;
@@ -847,7 +852,7 @@
     const ni = document.getElementById(`itemInput-${gi}`);
     if (ni) ni.focus();
   }
-  function toggleItem(gi, ii, el) {
+  function toggleItem(gi, ii, el) { if (!requireUnlock()) return;
     const item = groups[gi].items[ii];
     item.checked = !item.checked;
     if (item.checked && !item.date) item.date = new Date().toISOString().slice(0, 10);
@@ -860,7 +865,7 @@
     }
     renderGroups();
   }
-  function setItemDate(gi, ii, val) { groups[gi].items[ii].date = val; }
+  function setItemDate(gi, ii, val) { if (!requireUnlock()) return; groups[gi].items[ii].date = val; }
   function removeItem(gi, ii) { if (!requireUnlock()) return; groups[gi].items.splice(ii, 1); renderGroups(); saveState(); }
   function renameItem(gi, ii, el) { editInline(el, groups[gi].items[ii].name, v => { if (v) groups[gi].items[ii].name = v; renderGroups(); }); }
 
@@ -921,7 +926,7 @@
     });
   }
 
-  function addJadwalGroup() {
+  function addJadwalGroup() { if (!requireUnlock()) return;
     const val = jadwalGroupInputEl.value.trim();
     if (!val) return;
     jadwal.push({ name: val, items: [] });
@@ -930,7 +935,7 @@
   }
   function removeJadwalGroup(gi) { if (!requireUnlock()) return; jadwal.splice(gi, 1); renderJadwal(); saveState(); }
   function renameJadwalGroup(gi, el) { editInline(el, jadwal[gi].name, v => { if (v) jadwal[gi].name = v; renderJadwal(); }); }
-  function addJadwal(gi) {
+  function addJadwal(gi) { if (!requireUnlock()) return;
     const namaEl = document.getElementById(`jadwalNama-${gi}`);
     const tanggalEl = document.getElementById(`jadwalTanggal-${gi}`);
     const jamEl = document.getElementById(`jadwalJam-${gi}`);
@@ -989,7 +994,7 @@
       div.querySelector(`#tamuInput-${gi}`).addEventListener('keydown', e => { if (e.key === 'Enter') addTamu(gi); });
     });
   }
-  function addTamuGroup() {
+  function addTamuGroup() { if (!requireUnlock()) return;
     const val = tamuGroupInputEl.value.trim();
     if (!val) return;
     tamu.push({ name: val, items: [] });
@@ -998,7 +1003,7 @@
   }
   function removeTamuGroup(gi) { if (!requireUnlock()) return; tamu.splice(gi, 1); renderTamu(); saveState(); }
   function renameTamuGroup(gi, el) { editInline(el, tamu[gi].name, v => { if (v) tamu[gi].name = v; renderTamu(); }); }
-  function addTamu(gi) {
+  function addTamu(gi) { if (!requireUnlock()) return;
     const inputEl = document.getElementById(`tamuInput-${gi}`);
     const val = inputEl.value.trim();
     if (!val) return;
@@ -1007,7 +1012,7 @@
     const ni = document.getElementById(`tamuInput-${gi}`);
     if (ni) ni.focus();
   }
-  function toggleTamu(gi, ii, el) {
+  function toggleTamu(gi, ii, el) { if (!requireUnlock()) return;
     const t = tamu[gi].items[ii];
     t.checked = !t.checked;
     if (t.checked) {
@@ -1016,7 +1021,7 @@
     }
     renderTamu();
   }
-  function setTamuDate(gi, ii, val) { tamu[gi].items[ii].date = val; }
+  function setTamuDate(gi, ii, val) { if (!requireUnlock()) return; tamu[gi].items[ii].date = val; }
   function removeTamu(gi, ii) { if (!requireUnlock()) return; tamu[gi].items.splice(ii, 1); renderTamu(); saveState(); }
   function renameTamu(gi, ii, el) { editInline(el, tamu[gi].items[ii].name, v => { if (v) tamu[gi].items[ii].name = v; renderTamu(); }); }
   tamuGroupInputEl.addEventListener('keydown', e => { if (e.key === 'Enter') addTamuGroup(); });
@@ -1066,7 +1071,7 @@
       div.querySelector(`#vendorHarga-${gi}`).addEventListener('keydown', e => { if (e.key === 'Enter') addVendor(gi); });
     });
   }
-  function addVendorGroup() {
+  function addVendorGroup() { if (!requireUnlock()) return;
     const val = vendorGroupInputEl.value.trim();
     if (!val) return;
     vendor.push({ name: val, items: [] });
@@ -1075,7 +1080,7 @@
   }
   function removeVendorGroup(gi) { if (!requireUnlock()) return; vendor.splice(gi, 1); renderVendor(); saveState(); }
   function renameVendorGroup(gi, el) { editInline(el, vendor[gi].name, v => { if (v) vendor[gi].name = v; renderVendor(); }); }
-  function addVendor(gi) {
+  function addVendor(gi) { if (!requireUnlock()) return;
     const inputEl = document.getElementById(`vendorInput-${gi}`);
     const hargaEl = document.getElementById(`vendorHarga-${gi}`);
     const val = inputEl.value.trim();
@@ -1085,7 +1090,7 @@
     const ni = document.getElementById(`vendorInput-${gi}`);
     if (ni) ni.focus();
   }
-  function toggleVendor(gi, ii, el) {
+  function toggleVendor(gi, ii, el) { if (!requireUnlock()) return;
     const v = vendor[gi].items[ii];
     v.checked = !v.checked;
     if (v.checked) {
@@ -1094,7 +1099,7 @@
     }
     renderVendor();
   }
-  function setVendorDate(gi, ii, val) { vendor[gi].items[ii].date = val; }
+  function setVendorDate(gi, ii, val) { if (!requireUnlock()) return; vendor[gi].items[ii].date = val; }
   function removeVendor(gi, ii) { if (!requireUnlock()) return; vendor[gi].items.splice(ii, 1); renderVendor(); saveState(); }
   function renameVendor(gi, ii, el) { editInline(el, vendor[gi].items[ii].name, v => { if (v) vendor[gi].items[ii].name = v; renderVendor(); }); }
   function editVendorHarga(gi, ii, el) { editInline(el, vendor[gi].items[ii].harga || '', v => { vendor[gi].items[ii].harga = v || ''; renderVendor(); }); }
@@ -1162,7 +1167,7 @@
     if (btnIn) btnIn.classList.toggle('active', type === 'masuk');
     if (btnOut) btnOut.classList.toggle('active', type === 'keluar');
   }
-  function addKvGroup() {
+  function addKvGroup() { if (!requireUnlock()) return;
     const val = kvGroupInputEl.value.trim();
     if (!val) return;
     keuangan.push({ name: val, items: [] });
@@ -1171,7 +1176,7 @@
   }
   function removeKvGroup(gi) { if (!requireUnlock()) return; keuangan.splice(gi, 1); renderKeuangan(); saveState(); }
   function renameKvGroup(gi, el) { editInline(el, keuangan[gi].name, v => { if (v) keuangan[gi].name = v; renderKeuangan(); }); }
-  function addTransaksi(gi) {
+  function addTransaksi(gi) { if (!requireUnlock()) return;
     const nameEl = document.getElementById(`kvName-${gi}`);
     const amountEl = document.getElementById(`kvAmount-${gi}`);
     const name = nameEl.value.trim();
@@ -1201,7 +1206,7 @@
   const customTabBtnsEl = document.getElementById('customTabBtns');
   const customPanelsEl = document.getElementById('customPanels');
 
-  function addCustomTab() {
+  function addCustomTab() { if (!requireUnlock()) return;
     const name = prompt('Nama tab baru (mis. Souvenir, Baju, Katering):');
     if (!name || !name.trim()) return;
     customCounter += 1;
@@ -1277,7 +1282,7 @@
     });
   }
 
-  function addCustomItem(tabId) {
+  function addCustomItem(tabId) { if (!requireUnlock()) return;
     const inputEl = document.getElementById(`customInput-${tabId}`);
     const val = inputEl.value.trim();
     if (!val) return;
@@ -1289,7 +1294,7 @@
     if (ni) ni.focus();
   }
 
-  function toggleCustomItem(tabId, i, el) {
+  function toggleCustomItem(tabId, i, el) { if (!requireUnlock()) return;
     const tab = customTabs.find(t => t.id === tabId);
     const item = tab.items[i];
     item.checked = !item.checked;
@@ -1304,7 +1309,7 @@
     renderCustomItems(tabId);
   }
 
-  function setCustomItemDate(tabId, i, val) {
+  function setCustomItemDate(tabId, i, val) { if (!requireUnlock()) return;
     const tab = customTabs.find(t => t.id === tabId);
     tab.items[i].date = val;
   }
@@ -1326,7 +1331,7 @@
       const res = await fetch('/api/data');
       const saved = await res.json();
       if (saved) {
-        if (saved.weddingDate) dateEl.value = saved.weddingDate;
+        if (saved.weddingDate) { dateEl.value = saved.weddingDate; lastWeddingDate = saved.weddingDate; }
         if (saved.groups) groups = saved.groups;
         if (saved.jadwal) jadwal = migrateToGroups(saved.jadwal);
         if (saved.tamu) tamu = migrateToGroups(saved.tamu);
