@@ -120,14 +120,20 @@
   /* Tabs */
   .tabs {
     display: flex;
+    align-items: center;
     gap: 4px;
     margin-bottom: 20px;
     border-bottom: 2px solid var(--ink);
     padding-bottom: 0;
+  }
+  .tabs-scroll {
+    display: flex;
+    gap: 4px;
     overflow-x: auto;
     scrollbar-width: none;
+    min-width: 0;
   }
-  .tabs::-webkit-scrollbar { display: none; }
+  .tabs-scroll::-webkit-scrollbar { display: none; }
 
   .tab-btn {
     border: none;
@@ -475,13 +481,15 @@
     <span class="countdown" id="countdown"></span>
   </div>
 
-  <div class="tabs" id="defaultTabs">
-    <button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist <button class="tab-close" onclick="event.stopPropagation(); hideTab('checklist')" title="Sembunyikan tab">✕</button></button>
-    <button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal <button class="tab-close" onclick="event.stopPropagation(); hideTab('jadwal')" title="Sembunyikan tab">✕</button></button>
-    <button class="tab-btn" data-tab="tamu" onclick="switchTab('tamu')">👥 Tamu <button class="tab-close" onclick="event.stopPropagation(); hideTab('tamu')" title="Sembunyikan tab">✕</button></button>
-    <button class="tab-btn" data-tab="vendor" onclick="switchTab('vendor')">🛠️ Vendor <button class="tab-close" onclick="event.stopPropagation(); hideTab('vendor')" title="Sembunyikan tab">✕</button></button>
-    <button class="tab-btn" data-tab="keuangan" onclick="switchTab('keuangan')">💰 Keuangan <button class="tab-close" onclick="event.stopPropagation(); hideTab('keuangan')" title="Sembunyikan tab">✕</button></button>
-    <span id="customTabBtns"></span>
+  <div class="tabs">
+    <div class="tabs-scroll" id="defaultTabs">
+      <button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist <button class="tab-close" onclick="event.stopPropagation(); hideTab('checklist')" title="Sembunyikan tab">✕</button></button>
+      <button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal <button class="tab-close" onclick="event.stopPropagation(); hideTab('jadwal')" title="Sembunyikan tab">✕</button></button>
+      <button class="tab-btn" data-tab="tamu" onclick="switchTab('tamu')">👥 Tamu <button class="tab-close" onclick="event.stopPropagation(); hideTab('tamu')" title="Sembunyikan tab">✕</button></button>
+      <button class="tab-btn" data-tab="vendor" onclick="switchTab('vendor')">🛠️ Vendor <button class="tab-close" onclick="event.stopPropagation(); hideTab('vendor')" title="Sembunyikan tab">✕</button></button>
+      <button class="tab-btn" data-tab="keuangan" onclick="switchTab('keuangan')">💰 Keuangan <button class="tab-close" onclick="event.stopPropagation(); hideTab('keuangan')" title="Sembunyikan tab">✕</button></button>
+      <span id="customTabBtns"></span>
+    </div>
     <button class="tab-add-btn" onclick="addCustomTab()" title="Tambah tab baru">+</button>
     <span id="hiddenTabsBox"></span>
   </div>
