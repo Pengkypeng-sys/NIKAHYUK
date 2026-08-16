@@ -37,7 +37,7 @@
   .notebook {
     position: relative;
     width: 100%;
-    max-width: 520px;
+    max-width: 760px;
     background: var(--paper);
     border-radius: 4px;
     box-shadow:
@@ -141,52 +141,108 @@
   }
 
   /* Tabs */
+  /* Dashboard: sidebar nav (.tabs) + content (.panels) side by side on wide screens */
+  .dash {
+    display: flex;
+    gap: 22px;
+    align-items: flex-start;
+  }
+
   .tabs {
     display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid var(--ink);
-    padding-bottom: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    flex-shrink: 0;
+    width: 148px;
+    border-right: 1px solid var(--paper-line);
+    padding-right: 14px;
     position: relative;
   }
   .tabs-scroll {
     display: flex;
+    flex-direction: column;
     gap: 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
     min-width: 0;
   }
   .tabs-scroll::-webkit-scrollbar { display: none; }
-  /* ponytail: fade dikit di kanan biar jelas ada tab lain kalo kepotong scroll */
-  .tabs::after {
-    content: '';
-    position: absolute;
-    right: 26px; top: 0; bottom: 2px; width: 16px;
-    background: linear-gradient(to right, transparent, var(--paper));
-    pointer-events: none;
+
+  .panels { flex: 1; min-width: 0; }
+
+  @media (max-width: 680px) {
+    .dash { flex-direction: column; gap: 0; }
+    .tabs {
+      flex-direction: row;
+      align-items: center;
+      width: auto;
+      gap: 4px;
+      margin-bottom: 20px;
+      border-right: none;
+      border-bottom: 2px solid var(--ink);
+      padding-right: 0;
+      padding-bottom: 0;
+    }
+    .tabs-scroll {
+      flex-direction: row;
+      gap: 2px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    /* ponytail: fade dikit di kanan biar jelas ada tab lain kalo kepotong scroll */
+    .tabs::after {
+      content: '';
+      position: absolute;
+      right: 26px; top: 0; bottom: 2px; width: 16px;
+      background: linear-gradient(to right, transparent, var(--paper));
+      pointer-events: none;
+    }
   }
 
   .tab-btn {
     border: none;
+    border-left: 3px solid transparent;
+    border-radius: 4px;
     background: transparent;
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 500;
-    font-size: 10.5px;
-    letter-spacing: 0;
+    font-size: 12.5px;
+    letter-spacing: 0.01em;
     color: var(--ink-soft);
-    padding: 8px 5px 10px;
+    padding: 9px 8px 9px 10px;
     cursor: pointer;
     position: relative;
-    top: 2px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
     flex-shrink: 0;
     white-space: nowrap;
   }
+  .tab-btn:hover { background: rgba(43,42,40,0.04); }
 
   .tab-btn.active {
     color: var(--ink);
     font-weight: 700;
-    border-bottom: 2px solid var(--margin-red);
+    background: #fff;
+    border-left-color: var(--margin-red);
+  }
+
+  @media (max-width: 680px) {
+    .tab-btn {
+      border-left: none;
+      border-radius: 0;
+      top: 2px;
+      padding: 8px 5px 10px;
+      font-size: 10.5px;
+      letter-spacing: 0;
+    }
+    .tab-btn:hover { background: transparent; }
+    .tab-btn.active {
+      background: transparent;
+      border-bottom: 2px solid var(--margin-red);
+      border-left-color: transparent;
+    }
   }
 
   .tab-add-btn {
@@ -202,6 +258,10 @@
     position: relative;
   }
   .tab-add-btn:hover { color: var(--margin-red); }
+
+  @media (max-width: 680px) {
+    .tab-add-btn { top: 2px; }
+  }
 
   .tab-close {
     background: none; border: none; color: inherit;
@@ -545,82 +605,86 @@
     <span class="countdown" id="countdown"></span>
   </div>
 
-  <div class="tabs">
-    <div class="tabs-scroll" id="defaultTabs">
-      <button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist <button class="tab-close" onclick="event.stopPropagation(); hideTab('checklist')" title="Sembunyikan tab">✕</button></button>
-      <button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal <button class="tab-close" onclick="event.stopPropagation(); hideTab('jadwal')" title="Sembunyikan tab">✕</button></button>
-      <button class="tab-btn" data-tab="tamu" onclick="switchTab('tamu')">👥 Tamu <button class="tab-close" onclick="event.stopPropagation(); hideTab('tamu')" title="Sembunyikan tab">✕</button></button>
-      <button class="tab-btn" data-tab="vendor" onclick="switchTab('vendor')">🛠️ Vendor <button class="tab-close" onclick="event.stopPropagation(); hideTab('vendor')" title="Sembunyikan tab">✕</button></button>
-      <button class="tab-btn" data-tab="keuangan" onclick="switchTab('keuangan')">💰 Keuangan <button class="tab-close" onclick="event.stopPropagation(); hideTab('keuangan')" title="Sembunyikan tab">✕</button></button>
-      <span id="customTabBtns"></span>
-    </div>
-    <button class="tab-add-btn" onclick="addCustomTab()" title="Tambah tab baru">+</button>
-    <span id="hiddenTabsBox"></span>
-  </div>
-
-  <!-- CHECKLIST -->
-  <div class="tab-panel active" id="panel-checklist">
-    <div class="new-group">
-      <input type="text" id="groupInput" placeholder="Nama kategori, mis. Surat Nikah">
-      <button class="add" onclick="addGroup()">+ Kategori</button>
-    </div>
-    <div id="groups"></div>
-  </div>
-
-  <!-- JADWAL -->
-  <div class="tab-panel" id="panel-jadwal">
-    <div class="new-group">
-      <input type="text" id="jadwalGroupInput" placeholder="Nama kategori, mis. Akad">
-      <button class="add" onclick="addJadwalGroup()">+ Kategori</button>
-    </div>
-    <div id="jadwalGroups"></div>
-  </div>
-
-  <!-- TAMU -->
-  <div class="tab-panel" id="panel-tamu">
-    <div class="new-group">
-      <input type="text" id="tamuGroupInput" placeholder="Nama kategori, mis. Keluarga">
-      <button class="add" onclick="addTamuGroup()">+ Kategori</button>
-    </div>
-    <div id="tamuGroups"></div>
-  </div>
-
-  <!-- VENDOR -->
-  <div class="tab-panel" id="panel-vendor">
-    <div class="new-group">
-      <input type="text" id="vendorGroupInput" placeholder="Nama kategori, mis. Katering">
-      <button class="add" onclick="addVendorGroup()">+ Kategori</button>
-    </div>
-    <p class="subtitle" style="margin-top:-8px;">Centang kalau sudah DP / lunas.</p>
-    <div id="vendorGroups"></div>
-  </div>
-
-  <!-- KEUANGAN -->
-  <div class="tab-panel" id="panel-keuangan">
-    <div class="summary">
-      <div class="summary-card in">
-        <div class="label">Uang Masuk</div>
-        <div class="val" id="totalMasuk">Rp 0</div>
+  <div class="dash">
+    <div class="tabs">
+      <div class="tabs-scroll" id="defaultTabs">
+        <button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist <button class="tab-close" onclick="event.stopPropagation(); hideTab('checklist')" title="Sembunyikan tab">✕</button></button>
+        <button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal <button class="tab-close" onclick="event.stopPropagation(); hideTab('jadwal')" title="Sembunyikan tab">✕</button></button>
+        <button class="tab-btn" data-tab="tamu" onclick="switchTab('tamu')">👥 Tamu <button class="tab-close" onclick="event.stopPropagation(); hideTab('tamu')" title="Sembunyikan tab">✕</button></button>
+        <button class="tab-btn" data-tab="vendor" onclick="switchTab('vendor')">🛠️ Vendor <button class="tab-close" onclick="event.stopPropagation(); hideTab('vendor')" title="Sembunyikan tab">✕</button></button>
+        <button class="tab-btn" data-tab="keuangan" onclick="switchTab('keuangan')">💰 Keuangan <button class="tab-close" onclick="event.stopPropagation(); hideTab('keuangan')" title="Sembunyikan tab">✕</button></button>
+        <span id="customTabBtns"></span>
       </div>
-      <div class="summary-card out">
-        <div class="label">Uang Keluar</div>
-        <div class="val" id="totalKeluar">Rp 0</div>
-      </div>
-      <div class="summary-card saldo">
-        <div class="label">Saldo</div>
-        <div class="val" id="totalSaldo">Rp 0</div>
-      </div>
+      <button class="tab-add-btn" onclick="addCustomTab()" title="Tambah tab baru">+</button>
+      <span id="hiddenTabsBox"></span>
     </div>
 
-    <div class="new-group">
-      <input type="text" id="kvGroupInput" placeholder="Nama kategori, mis. Sewa Gedung">
-      <button class="add" onclick="addKvGroup()">+ Kategori</button>
+    <div class="panels">
+      <!-- CHECKLIST -->
+      <div class="tab-panel active" id="panel-checklist">
+        <div class="new-group">
+          <input type="text" id="groupInput" placeholder="Nama kategori, mis. Surat Nikah">
+          <button class="add" onclick="addGroup()">+ Kategori</button>
+        </div>
+        <div id="groups"></div>
+      </div>
+
+      <!-- JADWAL -->
+      <div class="tab-panel" id="panel-jadwal">
+        <div class="new-group">
+          <input type="text" id="jadwalGroupInput" placeholder="Nama kategori, mis. Akad">
+          <button class="add" onclick="addJadwalGroup()">+ Kategori</button>
+        </div>
+        <div id="jadwalGroups"></div>
+      </div>
+
+      <!-- TAMU -->
+      <div class="tab-panel" id="panel-tamu">
+        <div class="new-group">
+          <input type="text" id="tamuGroupInput" placeholder="Nama kategori, mis. Keluarga">
+          <button class="add" onclick="addTamuGroup()">+ Kategori</button>
+        </div>
+        <div id="tamuGroups"></div>
+      </div>
+
+      <!-- VENDOR -->
+      <div class="tab-panel" id="panel-vendor">
+        <div class="new-group">
+          <input type="text" id="vendorGroupInput" placeholder="Nama kategori, mis. Katering">
+          <button class="add" onclick="addVendorGroup()">+ Kategori</button>
+        </div>
+        <p class="subtitle" style="margin-top:-8px;">Centang kalau sudah DP / lunas.</p>
+        <div id="vendorGroups"></div>
+      </div>
+
+      <!-- KEUANGAN -->
+      <div class="tab-panel" id="panel-keuangan">
+        <div class="summary">
+          <div class="summary-card in">
+            <div class="label">Uang Masuk</div>
+            <div class="val" id="totalMasuk">Rp 0</div>
+          </div>
+          <div class="summary-card out">
+            <div class="label">Uang Keluar</div>
+            <div class="val" id="totalKeluar">Rp 0</div>
+          </div>
+          <div class="summary-card saldo">
+            <div class="label">Saldo</div>
+            <div class="val" id="totalSaldo">Rp 0</div>
+          </div>
+        </div>
+
+        <div class="new-group">
+          <input type="text" id="kvGroupInput" placeholder="Nama kategori, mis. Sewa Gedung">
+          <button class="add" onclick="addKvGroup()">+ Kategori</button>
+        </div>
+        <div id="kvGroups"></div>
+      </div>
+
+      <!-- CUSTOM TABS -->
+      <div id="customPanels"></div>
     </div>
-    <div id="kvGroups"></div>
   </div>
-
-  <!-- CUSTOM TABS -->
-  <div id="customPanels"></div>
 </div>
 
 <script>
