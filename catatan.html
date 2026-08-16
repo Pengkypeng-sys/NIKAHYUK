@@ -487,12 +487,23 @@
     .countdown.today { animation: none; }
   }
 
-  @media (max-width: 420px) {
-    .notebook { padding: 30px 18px 26px 42px; }
-    .margin-line { left: 24px; }
+  @media (max-width: 480px) {
+    body { padding: 20px 8px 40px; }
+    .notebook { padding: 26px 14px 24px 30px; }
+    .margin-line { left: 18px; }
     h1 { font-size: 30px; }
     .summary { flex-wrap: wrap; }
     .summary-card { min-width: 45%; }
+    /* ponytail: 16px stops iOS auto-zoom-on-focus, biggest mobile annoyance here */
+    input, select, textarea { font-size: 16px !important; }
+    .check-box { width: 24px; height: 24px; }
+    .check-box svg { width: 26px; height: 26px; }
+    li { min-height: 42px; gap: 10px; }
+    .del { font-size: 18px; padding: 8px; }
+    .tab-btn { padding: 10px 10px 12px; }
+    .tab-close { font-size: 13px; padding: 6px; opacity: 0.55; }
+    .tab-add-btn { padding: 10px 12px; }
+    button.add { padding: 10px 16px; }
   }
 </style>
 </head>
