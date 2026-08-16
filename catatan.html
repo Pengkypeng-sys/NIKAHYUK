@@ -791,8 +791,8 @@
     const tabs = document.querySelector('.tabs');
     const opening = !tabs.classList.contains('open');
     if (opening && window.matchMedia('(max-width: 680px)').matches) {
-      const r = document.querySelector('.tabs-menu-toggle').getBoundingClientRect();
-      tabs.style.top = `${r.bottom + 6}px`;
+      const r = document.querySelector('.date-box').getBoundingClientRect();
+      tabs.style.top = `${r.bottom + 8}px`;
       tabs.style.right = '12px';
     } else {
       tabs.style.top = '';
