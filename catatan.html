@@ -170,6 +170,8 @@
     cursor: pointer;
     position: relative;
     top: 2px;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .tab-btn.active {
@@ -364,10 +366,17 @@
   }
   .new-group input[type="text"] { border-bottom: none; padding: 6px 2px; }
   #groupInput { flex: 1; }
-  .group { margin-bottom: 26px; }
+  .group {
+    margin-bottom: 16px;
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: 8px;
+    padding: 14px 16px 10px;
+    box-shadow: 0 1px 3px rgba(43,42,40,0.06);
+  }
   .group-header {
     display: flex; align-items: baseline; justify-content: space-between;
-    margin-bottom: 8px; padding-bottom: 4px; border-bottom: 2px solid var(--ink);
+    margin-bottom: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--paper-line);
   }
   .group-title {
     font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px;
