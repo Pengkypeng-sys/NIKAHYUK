@@ -507,7 +507,7 @@
       <h1>Bismillah Nikah Yuk</h1>
       <p class="subtitle">Semua catatan persiapan nikah, dalam satu tempat.</p>
     </div>
-    <button id="lockBtn" class="lock-pill" onclick="toggleLock()">🔒 Terkunci</button>
+    <button id="lockBtn" class="lock-pill" onclick="toggleLock()">🔓 Belum dikunci</button>
   </div>
 
   <div class="date-box">
@@ -649,7 +649,7 @@
 
   function updateLockBtn() {
     const btn = document.getElementById('lockBtn');
-    btn.textContent = unlocked ? '🔓 Terbuka' : '🔒 Terkunci';
+    btn.textContent = !lockPin ? '🔓 Belum dikunci' : (unlocked ? '🔓 Terbuka' : '🔒 Terkunci');
   }
 
   function requireUnlock() {
