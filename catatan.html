@@ -789,10 +789,13 @@
   function toggleTabsMenu() {
     const tabs = document.querySelector('.tabs');
     const opening = !tabs.classList.contains('open');
-    if (opening) {
+    if (opening && window.matchMedia('(max-width: 680px)').matches) {
       const r = document.querySelector('.tabs-menu-toggle').getBoundingClientRect();
       tabs.style.top = `${r.bottom + 6}px`;
-      tabs.style.right = `${window.innerWidth - r.right}px`;
+      tabs.style.right = '12px';
+    } else {
+      tabs.style.top = '';
+      tabs.style.right = '';
     }
     tabs.classList.toggle('open', opening);
   }
