@@ -169,33 +169,58 @@
 
   .panels { flex: 1; min-width: 0; }
 
+  .tabs-menu-toggle { display: none; }
+
   @media (max-width: 680px) {
     .dash { flex-direction: column; gap: 0; }
     .tabs {
-      flex-direction: row;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       width: auto;
-      gap: 4px;
+      gap: 0;
       margin-bottom: 20px;
       border-right: none;
-      border-bottom: 2px solid var(--ink);
       padding-right: 0;
       padding-bottom: 0;
     }
+    .tabs-menu-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      border: 1px solid var(--paper-line);
+      background: #fff;
+      border-radius: 6px;
+      padding: 11px 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .tabs-menu-toggle:active { background: #f3ede0; }
     .tabs-scroll {
-      flex-direction: row;
+      display: none;
+      flex-direction: column;
       gap: 2px;
-      overflow-x: auto;
-      scrollbar-width: none;
+      background: #fff;
+      border: 1px solid var(--paper-line);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      padding: 4px;
     }
-    /* ponytail: fade dikit di kanan biar jelas ada tab lain kalo kepotong scroll */
-    .tabs::after {
-      content: '';
-      position: absolute;
-      right: 26px; top: 0; bottom: 2px; width: 16px;
-      background: linear-gradient(to right, transparent, var(--paper));
-      pointer-events: none;
+    .tabs.open .tabs-scroll { display: flex; }
+    .tabs.open .tabs-menu-toggle { border-radius: 6px 6px 0 0; }
+    .tab-item { border-left: none; border-radius: 4px; }
+    .tab-item:hover { background: rgba(43,42,40,0.04); }
+    .tab-item:has(.tab-btn.active) {
+      background: var(--paper);
+      border-left: 3px solid var(--margin-red);
     }
+    .tab-btn { padding: 10px 8px 10px 10px; font-size: 13px; }
+    .tab-add-btn, #hiddenTabsBox { display: none; }
+    .tabs.open .tab-add-btn { display: block; width: 100%; text-align: left; padding: 10px; }
+    .tabs.open #hiddenTabsBox { display: block; order: 99; }
   }
 
   .tab-item {
@@ -232,26 +257,6 @@
     font-weight: 700;
   }
 
-  @media (max-width: 680px) {
-    .tab-item {
-      border-left: none;
-      border-radius: 0;
-    }
-    .tab-item:hover { background: transparent; }
-    .tab-item:has(.tab-btn.active) {
-      background: transparent;
-      border-bottom: 2px solid var(--margin-red);
-      border-left-color: transparent;
-    }
-    .tab-btn {
-      top: 2px;
-      position: relative;
-      padding: 8px 2px 10px 5px;
-      font-size: 10.5px;
-      letter-spacing: 0;
-    }
-  }
-
   .tab-add-btn {
     border: none;
     background: transparent;
@@ -265,10 +270,6 @@
     position: relative;
   }
   .tab-add-btn:hover { color: var(--margin-red); }
-
-  @media (max-width: 680px) {
-    .tab-add-btn { top: 2px; }
-  }
 
   .tab-close {
     background: none; border: none; color: inherit;
@@ -601,7 +602,6 @@
   <div class="header-row">
     <div>
       <h1>Bismillah Nikah Yuk</h1>
-      <p class="subtitle">Semua catatan persiapan nikah, dalam satu tempat.</p>
     </div>
     <button id="lockBtn" class="lock-pill" onclick="toggleLock()">🔓 Belum dikunci</button>
   </div>
@@ -614,6 +614,7 @@
 
   <div class="dash">
     <div class="tabs">
+      <button class="tabs-menu-toggle" onclick="toggleTabsMenu()">☰ <span id="activeTabLabel">Checklist</span></button>
       <div class="tabs-scroll" id="defaultTabs">
         <div class="tab-item"><button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist</button><button class="tab-close" onclick="hideTab('checklist')" title="Sembunyikan tab">✕</button></div>
         <div class="tab-item"><button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal</button><button class="tab-close" onclick="hideTab('jadwal')" title="Sembunyikan tab">✕</button></div>
@@ -764,7 +765,12 @@
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
+    const activeBtn = document.querySelector('.tab-btn.active');
+    if (activeBtn) document.getElementById('activeTabLabel').textContent = activeBtn.textContent;
+    document.querySelector('.tabs').classList.remove('open');
   }
+
+  function toggleTabsMenu() { document.querySelector('.tabs').classList.toggle('open'); }
 
   function hideTab(tab) {
     if (!requireUnlock()) return;
