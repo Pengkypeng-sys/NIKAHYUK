@@ -91,6 +91,14 @@
     gap: 10px;
   }
 
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
   .lock-pill {
     flex-shrink: 0;
     border: 1px solid #b9ac93;
@@ -102,7 +110,6 @@
     padding: 5px 10px;
     border-radius: 999px;
     cursor: pointer;
-    margin-top: 2px;
     white-space: nowrap;
   }
   .lock-pill:hover { border-color: var(--margin-red); color: var(--margin-red); }
@@ -603,7 +610,10 @@
     <div>
       <h1>Bismillah Nikah Yuk</h1>
     </div>
-    <button id="lockBtn" class="lock-pill" onclick="toggleLock()">🔓 Belum dikunci</button>
+    <div class="header-actions">
+      <button class="lock-pill" onclick="downloadData()" title="Download semua data jadi file JSON">⬇ Download</button>
+      <button id="lockBtn" class="lock-pill" onclick="toggleLock()">🔓 Belum dikunci</button>
+    </div>
   </div>
 
   <div class="date-box">
@@ -699,6 +709,17 @@
   /* ---------- persistence (server, shared di semua device) ---------- */
   let isLoaded = false; // cegah save nimpa data server sebelum load awal kelar
   let saveTimer = null;
+  function downloadData() {
+    const data = { weddingDate: dateEl.value, groups, jadwal, tamu, vendor, keuangan, customTabs, customCounter };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nikahyuk-data-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   function saveState() {
     if (!isLoaded) return;
     clearTimeout(saveTimer);
