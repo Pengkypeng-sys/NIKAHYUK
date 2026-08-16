@@ -89,6 +89,24 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
+    position: relative;
+  }
+
+  .tabs-menu-toggle {
+    display: none;
+    flex-shrink: 0;
+    border: 1px solid #b9ac93;
+    background: #fff;
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    align-items: center;
+    gap: 4px;
   }
 
   .header-actions {
@@ -176,48 +194,27 @@
 
   .panels { flex: 1; min-width: 0; }
 
-  .tabs-menu-toggle { display: none; }
-
   @media (max-width: 680px) {
     .dash { flex-direction: column; gap: 0; }
+    .tabs-menu-toggle { display: flex; }
     .tabs {
-      flex-direction: column;
-      align-items: stretch;
-      width: auto;
-      gap: 0;
-      margin-bottom: 20px;
-      border-right: none;
-      padding-right: 0;
-      padding-bottom: 0;
-    }
-    .tabs-menu-toggle {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      border: 1px solid var(--paper-line);
-      background: #fff;
-      border-radius: 6px;
-      padding: 11px 14px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--ink);
-      cursor: pointer;
-    }
-    .tabs-menu-toggle:active { background: #f3ede0; }
-    .tabs-scroll {
       display: none;
       flex-direction: column;
+      align-items: stretch;
+      width: 200px;
       gap: 2px;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
       background: #fff;
       border: 1px solid var(--paper-line);
-      border-top: none;
-      border-radius: 0 0 6px 6px;
-      padding: 4px;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px -6px rgba(43,42,40,0.25);
+      padding: 6px;
+      z-index: 30;
     }
-    .tabs.open .tabs-scroll { display: flex; }
-    .tabs.open .tabs-menu-toggle { border-radius: 6px 6px 0 0; }
+    .tabs.open { display: flex; }
     .tab-item { border-left: none; border-radius: 4px; }
     .tab-item:hover { background: rgba(43,42,40,0.04); }
     .tab-item:has(.tab-btn.active) {
@@ -225,9 +222,7 @@
       border-left: 3px solid var(--margin-red);
     }
     .tab-btn { padding: 10px 8px 10px 10px; font-size: 13px; }
-    .tab-add-btn, #hiddenTabsBox { display: none; }
-    .tabs.open .tab-add-btn { display: block; width: 100%; text-align: left; padding: 10px; }
-    .tabs.open #hiddenTabsBox { display: block; order: 99; }
+    .tab-add-btn { width: 100%; text-align: left; padding: 10px; }
   }
 
   .tab-item {
@@ -611,6 +606,7 @@
       <h1>Bismillah Nikah Yuk</h1>
     </div>
     <div class="header-actions">
+      <button class="tabs-menu-toggle" onclick="toggleTabsMenu()">☰ <span id="activeTabLabel">Checklist</span></button>
       <button class="lock-pill" onclick="downloadData()" title="Download semua data jadi file JSON">⬇ Download</button>
       <button id="lockBtn" class="lock-pill" onclick="toggleLock()">🔓 Belum dikunci</button>
     </div>
@@ -624,7 +620,6 @@
 
   <div class="dash">
     <div class="tabs">
-      <button class="tabs-menu-toggle" onclick="toggleTabsMenu()">☰ <span id="activeTabLabel">Checklist</span></button>
       <div class="tabs-scroll" id="defaultTabs">
         <div class="tab-item"><button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist</button><button class="tab-close" onclick="hideTab('checklist')" title="Sembunyikan tab">✕</button></div>
         <div class="tab-item"><button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal</button><button class="tab-close" onclick="hideTab('jadwal')" title="Sembunyikan tab">✕</button></div>
