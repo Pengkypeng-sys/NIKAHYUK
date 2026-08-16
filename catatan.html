@@ -198,50 +198,57 @@
     }
   }
 
-  .tab-btn {
-    border: none;
+  .tab-item {
+    display: flex;
+    align-items: center;
     border-left: 3px solid transparent;
     border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .tab-item:hover { background: rgba(43,42,40,0.04); }
+  .tab-item:has(.tab-btn.active) {
+    background: #fff;
+    border-left-color: var(--margin-red);
+  }
+
+  .tab-btn {
+    border: none;
     background: transparent;
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 500;
     font-size: 12.5px;
     letter-spacing: 0.01em;
     color: var(--ink-soft);
-    padding: 9px 8px 9px 10px;
+    padding: 9px 4px 9px 10px;
     cursor: pointer;
-    position: relative;
     text-align: left;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
     white-space: nowrap;
   }
-  .tab-btn:hover { background: rgba(43,42,40,0.04); }
 
   .tab-btn.active {
     color: var(--ink);
     font-weight: 700;
-    background: #fff;
-    border-left-color: var(--margin-red);
   }
 
   @media (max-width: 680px) {
-    .tab-btn {
+    .tab-item {
       border-left: none;
       border-radius: 0;
-      top: 2px;
-      padding: 8px 5px 10px;
-      font-size: 10.5px;
-      letter-spacing: 0;
     }
-    .tab-btn:hover { background: transparent; }
-    .tab-btn.active {
+    .tab-item:hover { background: transparent; }
+    .tab-item:has(.tab-btn.active) {
       background: transparent;
       border-bottom: 2px solid var(--margin-red);
       border-left-color: transparent;
+    }
+    .tab-btn {
+      top: 2px;
+      position: relative;
+      padding: 8px 2px 10px 5px;
+      font-size: 10.5px;
+      letter-spacing: 0;
     }
   }
 
@@ -608,11 +615,11 @@
   <div class="dash">
     <div class="tabs">
       <div class="tabs-scroll" id="defaultTabs">
-        <button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist <span class="tab-close" role="button" tabindex="0" onclick="event.stopPropagation(); hideTab('checklist')" onkeydown="if(event.key==='Enter')this.click()" title="Sembunyikan tab">✕</span></button>
-        <button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal <span class="tab-close" role="button" tabindex="0" onclick="event.stopPropagation(); hideTab('jadwal')" onkeydown="if(event.key==='Enter')this.click()" title="Sembunyikan tab">✕</span></button>
-        <button class="tab-btn" data-tab="tamu" onclick="switchTab('tamu')">👥 Tamu <span class="tab-close" role="button" tabindex="0" onclick="event.stopPropagation(); hideTab('tamu')" onkeydown="if(event.key==='Enter')this.click()" title="Sembunyikan tab">✕</span></button>
-        <button class="tab-btn" data-tab="vendor" onclick="switchTab('vendor')">🛠️ Vendor <span class="tab-close" role="button" tabindex="0" onclick="event.stopPropagation(); hideTab('vendor')" onkeydown="if(event.key==='Enter')this.click()" title="Sembunyikan tab">✕</span></button>
-        <button class="tab-btn" data-tab="keuangan" onclick="switchTab('keuangan')">💰 Keuangan <span class="tab-close" role="button" tabindex="0" onclick="event.stopPropagation(); hideTab('keuangan')" onkeydown="if(event.key==='Enter')this.click()" title="Sembunyikan tab">✕</span></button>
+        <div class="tab-item"><button class="tab-btn active" data-tab="checklist" onclick="switchTab('checklist')">✅ Checklist</button><button class="tab-close" onclick="hideTab('checklist')" title="Sembunyikan tab">✕</button></div>
+        <div class="tab-item"><button class="tab-btn" data-tab="jadwal" onclick="switchTab('jadwal')">📅 Jadwal</button><button class="tab-close" onclick="hideTab('jadwal')" title="Sembunyikan tab">✕</button></div>
+        <div class="tab-item"><button class="tab-btn" data-tab="tamu" onclick="switchTab('tamu')">👥 Tamu</button><button class="tab-close" onclick="hideTab('tamu')" title="Sembunyikan tab">✕</button></div>
+        <div class="tab-item"><button class="tab-btn" data-tab="vendor" onclick="switchTab('vendor')">🛠️ Vendor</button><button class="tab-close" onclick="hideTab('vendor')" title="Sembunyikan tab">✕</button></div>
+        <div class="tab-item"><button class="tab-btn" data-tab="keuangan" onclick="switchTab('keuangan')">💰 Keuangan</button><button class="tab-close" onclick="hideTab('keuangan')" title="Sembunyikan tab">✕</button></div>
         <span id="customTabBtns"></span>
       </div>
       <button class="tab-add-btn" onclick="addCustomTab()" title="Tambah tab baru">+</button>
@@ -1321,18 +1328,27 @@
     customPanelsEl.innerHTML = '';
 
     customTabs.forEach(tab => {
+      const wrap = document.createElement('div');
+      wrap.className = 'tab-item';
       const btn = document.createElement('button');
       btn.className = 'tab-btn';
       btn.dataset.tab = tab.id;
-      btn.innerHTML = `📌 ${escapeHtml(tab.name)} <span class="tab-close" role="button" tabindex="0" onclick="event.stopPropagation(); removeCustomTab('${tab.id}')" onkeydown="if(event.key==='Enter')this.click()" title="Hapus tab">✕</span>`;
+      btn.textContent = `📌 ${tab.name}`;
       btn.title = 'Klik utk buka, dobel-klik utk ganti nama';
-      btn.addEventListener('click', (e) => { if (e.target.classList.contains('tab-close')) return; switchTab(tab.id); });
+      btn.addEventListener('click', () => switchTab(tab.id));
       btn.addEventListener('dblclick', (e) => {
         e.stopPropagation();
         const nv = prompt('Ganti nama tab:', tab.name);
         if (nv && nv.trim()) { tab.name = nv.trim(); renderCustomTabs(); switchTab(tab.id); }
       });
-      customTabBtnsEl.appendChild(btn);
+      const close = document.createElement('button');
+      close.className = 'tab-close';
+      close.title = 'Hapus tab';
+      close.textContent = '✕';
+      close.addEventListener('click', () => removeCustomTab(tab.id));
+      wrap.appendChild(btn);
+      wrap.appendChild(close);
+      customTabBtnsEl.appendChild(wrap);
 
       const panel = document.createElement('div');
       panel.className = 'tab-panel';
